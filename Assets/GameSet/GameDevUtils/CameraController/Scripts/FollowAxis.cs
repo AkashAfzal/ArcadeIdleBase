@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 
-namespace GameAssets.GameSet.GameDevUtils.CameraController.Scripts
+namespace GameDevUtils.CameraController
 {
 
 	
@@ -24,8 +24,12 @@ namespace GameAssets.GameSet.GameDevUtils.CameraController.Scripts
 		[SerializeField, Range(1, 20)] float    followSpeed = 5;
 		[SerializeField, Range(1, 20)] float    lookSpeed   = 5;
 		public                         AxisMask axis;
-
-		protected override void UpdateCamera(Transform camera, Transform pivot, Transform target, float deltaTime)
+		
+		public override void Execute()
+		{
+			UpdateCamera(cameraDetails.camera, cameraDetails.pivot, cameraDetails.target, cameraDetails.deltaTime);
+		}
+		void UpdateCamera(Transform camera, Transform pivot, Transform target, float deltaTime)
 		{
 			var cameraPosition = camera.position;
 			if ((axis & AxisMask.X) == AxisMask.X)

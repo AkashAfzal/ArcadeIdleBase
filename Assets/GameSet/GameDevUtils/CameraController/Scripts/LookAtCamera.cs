@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-namespace GameAssets.GameSet.GameDevUtils.CameraController.Scripts
+namespace GameDevUtils.CameraController
 {
 
 
@@ -11,8 +11,12 @@ namespace GameAssets.GameSet.GameDevUtils.CameraController.Scripts
 
 		[SerializeField] protected     Vector3 lookOffset;
 		[SerializeField, Range(1, 20)] float   lookSpeed = 5;
-
-		protected override void UpdateCamera(Transform camera, Transform pivot, Transform target, float deltaTime)
+		
+		public override void Execute()
+		{
+			UpdateCamera(cameraDetails.camera, cameraDetails.pivot, cameraDetails.target, cameraDetails.deltaTime);
+		}
+		void UpdateCamera(Transform camera, Transform pivot, Transform target, float deltaTime)
 		{
 			camera.rotation = Quaternion.Slerp(camera.rotation, Quaternion.Euler(lookOffset), lookSpeed * deltaTime);
 		}

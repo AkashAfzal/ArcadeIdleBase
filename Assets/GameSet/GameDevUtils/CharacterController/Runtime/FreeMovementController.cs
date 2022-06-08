@@ -13,7 +13,6 @@ namespace GameDevUtils.Controller
 		[SerializeField] float forwardSpeedAcceleration;
 		[SerializeField] float forwardSpeedDeceleration;
 		[SerializeField] float rotationSpeed;
-		[SerializeField] float animatorSpeedFactor;
 
 		//Private Fields
 		float         forwardSpeed;
@@ -70,9 +69,9 @@ namespace GameDevUtils.Controller
 
 		void UpdateAnimator(Vector3 velocity)
 		{
-			float normVerticalSpeed = velocity.magnitude / (maxForwardSpeed/2.5f);
+			float normVerticalSpeed = velocity.magnitude / (maxForwardSpeed/3f);
 			Animator.SetFloat("Value", normVerticalSpeed > 0.15f ? normVerticalSpeed : 0);
-			Animator.speed = animatorSpeedFactor;
+			Animator.speed = maxForwardSpeed/2;
 		}
 
 	}

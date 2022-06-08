@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DG.Tweening;
-using GameAssets.GameSet.GameDevUtils.CameraController.Scripts;
 // using ElephantSDK;
 // using GameAnalyticsSDK;
 using UnityEngine;
@@ -43,9 +42,7 @@ namespace GameAssets.GameSet.GameDevUtils.Managers
 
 
 		static UnityEvent<GameState> onGameStateChangedEvent = new UnityEvent<GameState>();
-
-		public SimpleFollow followCameraAsset;
-		public SimpleFollow finalCameraAsset;
+		
 		public LevelManager levelManager;
 		public UIManager    uiManager;
 

@@ -1,15 +1,11 @@
-using System;
-using System.Collections;
-using GameAssets.GameSet.GameDevUtils.Managers;
-using GameAssets.GameSet.GameDevUtils.StateMachine;
 using UnityEngine;
 
 
-namespace GameAssets.GameSet.GameDevUtils.CameraController.Scripts
+namespace GameDevUtils.CameraController
 {
 
 
-	public class CameraController : StateMachine.StateMachine
+	public class CameraController : MonoBehaviour
 	{
 
 		protected enum UpdateType
@@ -21,72 +17,29 @@ namespace GameAssets.GameSet.GameDevUtils.CameraController.Scripts
 
 		}
 
-		//public static event Action<int> changeCamera;
-		public static Action<CameraState, Transform> anyCamera;
-		public static Action                         resetToDefaultCamera;
-		public        CameraData                     details;
-		public        CameraState[]                  cameraStates;
+		public  CameraData    details;
+		public  CameraState[] cameraStates;
+		public CameraState   CurrentCameraState;
+
 
 		[SerializeField] protected UpdateType updateType;
-		Transform                             defualtTarget;
-		public GameObject                     celebrationParticles;
 
 		void Awake()
 		{
-			anyCamera            = AnyCamera;
-			resetToDefaultCamera = DefaultCamera;
-			//changeCamera = ChangeCamera;
-			foreach (CameraState state in cameraStates)
-			{
-				cachedStates.Add(state.stateName, state);
-			}
-
 			foreach (CameraState cameraState in cameraStates)
 			{
-				cameraState.Init(this);
+				cameraState.InitState();
 			}
 
-			defualtTarget    = details.target;
-			currentStateName = string.IsNullOrEmpty(currentStateName) ? cameraStates[0].stateName : currentStateName;
-			LoadState(currentStateName, Entry);
+			ChangeCam(0);
 		}
 
-		void OnEnable()
-		{
-			GameManager.onCompleteEvent += ONLevelComplete;
-		}
-
-		void OnDisable()
-		{
-			GameManager.onCompleteEvent -= ONLevelComplete;
-		}
-
-		private void ONLevelComplete()
-		{
-			celebrationParticles.SetActive(true);
-			
-		}
-		
 		private void Update()
 		{
 			if (updateType == UpdateType.Update)
 			{
 				details.deltaTime = Time.deltaTime;
 				UpdateCamera();
-			}
-		}
-
-		public void CameraSwitch(bool staticCam, bool movingCam)
-		{
-			if (staticCam)
-			{
-				details.target = details.staticTarget;
-				defualtTarget  = details.target;
-			}
-			else if (movingCam)
-			{
-				details.target = details.movingTarget;
-				defualtTarget  = details.target;
 			}
 		}
 
@@ -110,46 +63,18 @@ namespace GameAssets.GameSet.GameDevUtils.CameraController.Scripts
 
 		protected virtual void UpdateCamera()
 		{
-			if (currentAnyState != null)
+			if (details.target != null)
 			{
-				((CameraState) currentAnyState).cameraDetails = details;
+				CurrentCameraState.cameraDetails = details;
+				CurrentCameraState.Execute();
 			}
-			else
-				((CameraState) currentState).cameraDetails = details;
-
-			StatesExecution();
+				
 		}
 
-		public void AnyCamera(CameraState cameraState, Transform target)
-		{
-			if (target)
-				details.target = target;
-			AnyTransition(cameraState);
-		}
-
-		public void DefaultCamera()
-		{
-			details.target = defualtTarget;
-			ExitAnyStates();
-		}
-
-		public override void LoadState(string id, Action<IState> onStateLoad)
-		{
-			if (cachedStates.ContainsKey(id))
-			{
-				onStateLoad?.Invoke(cachedStates[id]);
-			}
-		}
-
-		void OnDestroy()
-		{
-			anyCamera            = null;
-			resetToDefaultCamera = null;
-		}
 
 		public void ChangeCam(int id)
 		{
-			cameraStates[id].SetTransitions();
+			CurrentCameraState               = cameraStates[id];
 		}
 
 	}
