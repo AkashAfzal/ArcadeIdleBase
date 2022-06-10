@@ -69,9 +69,9 @@ namespace GameDevUtils.Controller
 
 		void UpdateAnimator(Vector3 velocity)
 		{
-			float normVerticalSpeed = velocity.magnitude / (maxForwardSpeed/3f);
+			float normVerticalSpeed = velocity.magnitude / (maxForwardSpeed / 3f);
 			Animator.SetFloat("Value", normVerticalSpeed > 0.15f ? normVerticalSpeed : 0);
-			Animator.speed = maxForwardSpeed/2;
+			Animator.speed = normVerticalSpeed > 0.15f ? maxForwardSpeed / 2 : 1;
 		}
 
 	}
