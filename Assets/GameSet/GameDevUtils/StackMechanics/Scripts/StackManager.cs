@@ -15,18 +15,20 @@ public class StackPrefab
 
 public class StackManager : MonoBehaviour
 {
-	public static            StackManager  Instance { get; private set; }
-	
-	
-	[SerializeField] private Transform        stackPoint;
-	[SerializeField] private StackPrefab[]    stackPrefabs;
-	
-	public                   List<GameObject> spawnedObjects = new List<GameObject>();
-	
-	
-	
+
+	//Singleton 
+	public static StackManager Instance { get; private set; }
+
+	//Inspector Fields 
+	[SerializeField] private Transform     stackPoint;
+	[SerializeField] private StackPrefab[] allStackPrefabs;
+
+	//Private Fields
+	private          List<Vector3>    SpawnPoints    = new List<Vector3>();
+	private readonly List<GameObject> SpawnedObjects = new List<GameObject>();
+
+
 	//Properties
-	public                  List<Vector3>    SpawnPoints;
 
 	private StackFormation formation;
 	StackFormation Formation
@@ -50,26 +52,25 @@ public class StackManager : MonoBehaviour
 
 	public void AddStack(string prefabID)
 	{
-		if (SpawnPoints.Count == spawnedObjects.Count) return;
-		var pos  = SpawnPoints[spawnedObjects.Count];
-		Debug.Log($"{pos} and {spawnedObjects.Count} and {stackPoint.position + pos}");
-		var unit = Instantiate(SpawnPrefab(prefabID), stackPoint);
-		unit.transform.position = stackPoint.position + pos;
-		unit.transform.rotation = stackPoint.rotation;
-		spawnedObjects.Add(unit);
+		if (SpawnPoints.Count == SpawnedObjects.Count) return;
+		var pos  = SpawnPoints[SpawnedObjects.Count];
+		var item = Instantiate(SpawnPrefab(prefabID), stackPoint);
+		item.transform.localPosition = pos;
+		item.transform.rotation      = stackPoint.rotation;
+		SpawnedObjects.Add(item);
 	}
 
 	public void RemoveStack()
 	{
-		var last = spawnedObjects.Last();
-		spawnedObjects.Remove(last);
+		var last = SpawnedObjects.Last();
+		SpawnedObjects.Remove(last);
 		Destroy(last.gameObject);
 	}
 
 	private GameObject SpawnPrefab(string prefabID)
 	{
 		GameObject prefab = null;
-		foreach (StackPrefab stackObject in stackPrefabs)
+		foreach (StackPrefab stackObject in allStackPrefabs)
 		{
 			if (String.Equals(prefabID, stackObject.uniqueID))
 				return stackObject.prefab;
@@ -78,4 +79,5 @@ public class StackManager : MonoBehaviour
 		Debug.LogError($"Prefab ID {prefabID} not Available");
 		return prefab;
 	}
+
 }
