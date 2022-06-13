@@ -20,11 +20,11 @@ public class StackManager : MonoBehaviour
 	public static StackManager Instance { get; private set; }
 
 	//Inspector Fields 
+	public                   int           maxQuantity = 10;
 	[SerializeField] private Transform     stackPoint;
 	[SerializeField] private StackPrefab[] allStackPrefabs;
 
 	//Private Fields
-	private          List<Vector3>    SpawnPoints    = new List<Vector3>();
 	private readonly List<GameObject> SpawnedObjects = new List<GameObject>();
 
 
@@ -39,6 +39,19 @@ public class StackManager : MonoBehaviour
 			return formation;
 		}
 	}
+	
+	private List<Vector3> SpawnPoints
+	{
+		get
+		{
+			if (maxQuantity > Formation.StackMaxSize)
+			{
+				Formation.SetFormationValues(maxQuantity);
+			}
+
+			return Formation.EvaluatePoints().ToList();
+		}
+	}
 
 	void Awake()
 	{
@@ -46,13 +59,11 @@ public class StackManager : MonoBehaviour
 		{
 			Instance = this;
 		}
-
-		SpawnPoints = Formation.EvaluatePoints().ToList();
 	}
 
 	public void AddStack(string prefabID)
 	{
-		if (SpawnPoints.Count == SpawnedObjects.Count) return;
+		if (maxQuantity == SpawnedObjects.Count) return;
 		var pos  = SpawnPoints[SpawnedObjects.Count];
 		var item = Instantiate(SpawnPrefab(prefabID), stackPoint);
 		item.transform.localPosition = pos;
@@ -78,6 +89,14 @@ public class StackManager : MonoBehaviour
 
 		Debug.LogError($"Prefab ID {prefabID} not Available");
 		return prefab;
+	}
+
+	public void RearrangeStack()
+	{
+		for (var i = 0; i < SpawnedObjects.Count; i++)
+		{
+			SpawnedObjects[i].transform.localPosition = SpawnPoints[i];
+		}
 	}
 
 }
