@@ -24,7 +24,7 @@ namespace GameDevUtils.CameraController
 		[SerializeField, Range(1, 20)] float    followSpeed = 5;
 		[SerializeField, Range(1, 20)] float    lookSpeed   = 5;
 		public                         AxisMask axis;
-		
+
 		public override void Execute()
 		{
 			UpdateCamera(cameraDetails.camera, cameraDetails.pivot, cameraDetails.target, cameraDetails.deltaTime);

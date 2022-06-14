@@ -75,11 +75,18 @@ public class StackManager : MonoBehaviour
 		return prefab;
 	}
 
-	public void RemoveStack(string stackObjectID)
+	public void RemoveStack(string stackObjectID, out bool isAvailableInStack)
 	{
 		IStackObject last = LastStackObject(stackObjectID);
+		if (last == null)
+		{
+			isAvailableInStack = false;
+			return;
+		}
+		
+		isAvailableInStack = true;
 		SpawnedStack.Remove(last);
-		Destroy(last.gameObject);
+		Destroy(last._GameObject);
 		RearrangeStack();
 	}
 

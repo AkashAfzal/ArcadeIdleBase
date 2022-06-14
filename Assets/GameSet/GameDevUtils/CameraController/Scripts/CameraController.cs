@@ -17,8 +17,8 @@ namespace GameDevUtils.CameraController
 
 		}
 
-		public  CameraData    details;
-		public  CameraState[] cameraStates;
+		public CameraData    details;
+		public CameraState[] cameraStates;
 		public CameraState   CurrentCameraState;
 
 
@@ -30,7 +30,7 @@ namespace GameDevUtils.CameraController
 			{
 				cameraState.InitState();
 			}
-
+			details.camera.position = Vector3.zero;
 			ChangeCam(0);
 		}
 
@@ -68,13 +68,12 @@ namespace GameDevUtils.CameraController
 				CurrentCameraState.cameraDetails = details;
 				CurrentCameraState.Execute();
 			}
-				
 		}
 
 
 		public void ChangeCam(int id)
 		{
-			CurrentCameraState               = cameraStates[id];
+			CurrentCameraState = cameraStates[id];
 		}
 
 	}
