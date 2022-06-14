@@ -1,20 +1,17 @@
 using UnityEngine;
 
-public class Collectable : MonoBehaviour, IStackObject
+public class Collectable : MonoBehaviour
 {
 
-   [SerializeField] string id;
-   public           string ID => id;
+	[SerializeField] string id;
 
-   void OnTriggerEnter(Collider other)
-   {
-      if (other.CompareTag("Player"))
-      {
-         StackManager.Instance.AddStack(ID);
-         gameObject.SetActive(false);
-      }
-   }
-
- 
+	void OnTriggerEnter(Collider other)
+	{
+		if (other.CompareTag("Player"))
+		{
+			other.GetComponent<StackManager>().AddStack(id);
+			gameObject.SetActive(false);
+		}
+	}
 
 }

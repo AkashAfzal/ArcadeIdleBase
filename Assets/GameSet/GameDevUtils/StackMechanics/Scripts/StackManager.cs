@@ -16,19 +16,18 @@ public class StackPrefab
 public class StackManager : MonoBehaviour
 {
 
-	//Singleton 
-	public static StackManager Instance { get; private set; }
-
 	//Inspector Fields 
 	public                   int           maxQuantity = 10;
 	[SerializeField] private Transform     stackPoint;
 	[SerializeField] private StackPrefab[] allStackPrefabs;
 
 	//Private Fields
-	private readonly List<GameObject> SpawnedObjects = new List<GameObject>();
+	private readonly List<IStackObject> SpawnedStack = new List<IStackObject>();
 
 
 	//Properties
+
+	public bool IsStackQuantityFull => maxQuantity == SpawnedStack.Count;
 
 	private StackFormation formation;
 	StackFormation Formation
@@ -39,7 +38,7 @@ public class StackManager : MonoBehaviour
 			return formation;
 		}
 	}
-	
+
 	private List<Vector3> SpawnPoints
 	{
 		get
@@ -53,29 +52,14 @@ public class StackManager : MonoBehaviour
 		}
 	}
 
-	void Awake()
-	{
-		if (Instance == null)
-		{
-			Instance = this;
-		}
-	}
 
 	public void AddStack(string prefabID)
 	{
-		if (maxQuantity == SpawnedObjects.Count) return;
-		var pos  = SpawnPoints[SpawnedObjects.Count];
-		var item = Instantiate(SpawnPrefab(prefabID), stackPoint);
-		item.transform.localPosition = pos;
-		item.transform.rotation      = stackPoint.rotation;
-		SpawnedObjects.Add(item);
-	}
-
-	public void RemoveStack()
-	{
-		var last = SpawnedObjects.Last();
-		SpawnedObjects.Remove(last);
-		Destroy(last.gameObject);
+		if (IsStackQuantityFull) return;
+		var item         = Instantiate(SpawnPrefab(prefabID), stackPoint);
+		var iStackObject = item.GetComponent<IStackObject>();
+		iStackObject.SetPositionRotation(SpawnPoints[SpawnedStack.Count], stackPoint.rotation);
+		SpawnedStack.Add(iStackObject);
 	}
 
 	private GameObject SpawnPrefab(string prefabID)
@@ -91,11 +75,35 @@ public class StackManager : MonoBehaviour
 		return prefab;
 	}
 
-	public void RearrangeStack()
+	public void RemoveStack(string stackObjectID)
 	{
-		for (var i = 0; i < SpawnedObjects.Count; i++)
+		IStackObject last = LastStackObject(stackObjectID);
+		SpawnedStack.Remove(last);
+		Destroy(last.gameObject);
+		RearrangeStack();
+	}
+
+	private IStackObject LastStackObject(string stackObjectID)
+	{
+		IStackObject iStackObject = null;
+		for (int i = 0; i < SpawnedStack.Count; i++)
 		{
-			SpawnedObjects[i].transform.localPosition = SpawnPoints[i];
+			if (SpawnedStack[i].ID == stackObjectID)
+			{
+				iStackObject = SpawnedStack[i];
+				return iStackObject;
+			}
+		}
+
+		return iStackObject;
+	}
+
+
+	void RearrangeStack()
+	{
+		for (var i = 0; i < SpawnedStack.Count; i++)
+		{
+			SpawnedStack[i].SetPositionRotation(SpawnPoints[i], stackPoint.rotation);
 		}
 	}
 
