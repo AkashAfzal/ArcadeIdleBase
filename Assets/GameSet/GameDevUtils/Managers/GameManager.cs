@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 
-namespace GameAssets.GameSet.GameDevUtils.Managers
+namespace GameDevUtils.CurrencyManager
 {
 
 	public enum GameState

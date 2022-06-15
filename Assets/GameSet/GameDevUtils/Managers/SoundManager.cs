@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameAssets.GameSet.GameDevUtils.Managers
+namespace GameDevUtils.CurrencyManager
 {
 
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
-using GameAssets.GameSet.GameDevUtils.Managers;
+using GameDevUtils.CurrencyManager;
 
 public enum UIFeedbackType
 {

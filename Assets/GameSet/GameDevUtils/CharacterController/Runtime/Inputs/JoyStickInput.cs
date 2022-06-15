@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-namespace GameDevUtils.Controller.InputSystem
+namespace GameDevUtils.CharacterController.InputSystem
 {
 
 

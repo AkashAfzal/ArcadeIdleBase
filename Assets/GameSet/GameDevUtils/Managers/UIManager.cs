@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-namespace GameAssets.GameSet.GameDevUtils.Managers
+namespace GameDevUtils.CurrencyManager
 {
 
 

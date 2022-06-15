@@ -1,8 +1,8 @@
-using GameDevUtils.Controller.InputSystem;
 using UnityEngine;
+using GameDevUtils.CharacterController.InputSystem;
 
 
-namespace GameDevUtils.Controller
+namespace GameDevUtils.CharacterController
 {
 
 
