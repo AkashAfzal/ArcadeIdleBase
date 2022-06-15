@@ -44,6 +44,7 @@ public class DropArea : MonoBehaviour
 				StopCoroutine(nameof(DropStack));
 				break;
 			}
+			CoinsManager.Instance.AddCoins(transform.position,1);
 			stackManager.AddStack(requiredID);
 			yield return new WaitForSeconds(0.1f);
 		}
