@@ -19,7 +19,7 @@ namespace GameDevUtils.CameraController
 
 		public CameraData    details;
 		public CameraState[] cameraStates;
-		public CameraState   CurrentCameraState;
+		CameraState          CurrentCameraState;
 
 
 		[SerializeField] protected UpdateType updateType;
@@ -30,6 +30,7 @@ namespace GameDevUtils.CameraController
 			{
 				cameraState.InitState();
 			}
+
 			details.camera.position = Vector3.zero;
 			ChangeCam(0);
 		}

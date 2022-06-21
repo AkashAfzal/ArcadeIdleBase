@@ -21,6 +21,8 @@ namespace GameDevUtils.CharacterController
 		Vector3       currentVelocity;
 		JoyStickInput joyStickInput;
 
+		public bool IsPlayerInputApplied => joyStickInput?.JoystickDirection.magnitude > 0.1f;
+
 
 		protected override void Init()
 		{
