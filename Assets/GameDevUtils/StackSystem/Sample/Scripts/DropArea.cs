@@ -6,6 +6,7 @@ using UnityEngine;
 public class DropArea : MonoBehaviour
 {
 
+	[SerializeField] string       stackName;
 	[SerializeField] string       requiredID;
 	[SerializeField] StackManager stackManager;
 
@@ -16,7 +17,7 @@ public class DropArea : MonoBehaviour
 	{
 		if (other.CompareTag("Player") && other.gameObject.GetComponent<StackManager>())
 		{
-			if (stackManager.IsStackQuantityFull) return;
+			if (stackManager.IsCapacityFullOfStack(stackName)) return;
 			PlayerStack = other.gameObject.GetComponent<StackManager>();
 			IsDropStack = true;
 			StartCoroutine(nameof(DropStack));
@@ -36,18 +37,18 @@ public class DropArea : MonoBehaviour
 
 	IEnumerator DropStack()
 	{
-		while (IsDropStack && !stackManager.IsStackQuantityFull)
+		while (IsDropStack && !stackManager.IsCapacityFullOfStack(stackName))
 		{
-			PlayerStack.RemoveStack(requiredID, out bool isAvailableInStack);
-			if (!isAvailableInStack)
+			var iStackObject = PlayerStack.RemoveStack(stackName, requiredID);
+			if (iStackObject == null)
 			{
 				IsDropStack = false;
 				StopCoroutine(nameof(DropStack));
 				break;
 			}
 
-			CurrencyManager.Instance.PlusCurrencyValueWithAnimation("Coins",  1, transform.position);
-			stackManager.AddStack(requiredID);
+			CurrencyManager.Instance.PlusCurrencyValueWithAnimation("Coins", 1, transform.position);
+			stackManager.AddStack(stackName, iStackObject);
 			yield return new WaitForSeconds(0.1f);
 		}
 	}

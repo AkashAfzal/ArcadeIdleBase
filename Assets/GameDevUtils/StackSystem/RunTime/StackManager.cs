@@ -18,14 +18,17 @@ namespace GameDevUtils.StackSystem
 
 	}
 
-	public class StackManager : MonoBehaviour
+	[Serializable]
+	public class Stack
 	{
 
-		public event Action OnStackValueRemove;
-		public event Action OnStackValueFull;
+		//Fields 
+
+
+		#region Fields
 
 		//Public and Inspector Fields 
-		[SerializeField] private bool           isTestingMode;
+		public                   string         uniqueStackName;
 		[SerializeField] private bool           withoutFormation;
 		[SerializeField] private StackFormation formation;
 		[SerializeField] private UpgradesData   upgradesData;
@@ -36,24 +39,16 @@ namespace GameDevUtils.StackSystem
 		//Private Fields
 		private readonly List<IStackObject> SpawnedStack = new List<IStackObject>();
 
+		#endregion
+
 
 		//Properties
-		private int  UpgradeLevel        { get; set; } = 0;
-		private int  MaxCapacity         => initialCapacity + (upgradesData != null && UpgradeLevel != 0 ? upgradesData.upgrades[UpgradeLevel - 1].upgradeCapacity : 0);
-		public  int  CurrentUpgradePrice => upgradesData.upgrades[UpgradeLevel].upgradePrice;
-		public  bool IsFullyUpgraded     => upgradesData == null || UpgradeLevel == upgradesData.upgrades.Length;
-		public bool IsStackQuantityFull
-		{
-			get
-			{
-				if (MaxCapacity == SpawnedStack.Count)
-				{
-					OnStackValueFull?.Invoke();
-				}
 
-				return MaxCapacity == SpawnedStack.Count;
-			}
-		}
+
+		#region PrivateProperties
+
+		private int UpgradeLevel { get; set; } = 0;
+		private int MaxCapacity  => initialCapacity + (upgradesData != null && UpgradeLevel != 0 ? upgradesData.upgrades[UpgradeLevel - 1].upgradeCapacity : 0);
 
 		private List<Vector3> SpawnPoints
 		{
@@ -69,49 +64,44 @@ namespace GameDevUtils.StackSystem
 			}
 		}
 
-		void Update()
-		{
-			if (isTestingMode)
-			{
-				RearrangeStack();
-			}
-		}
+		#endregion
 
-		/// <summary>
-		/// Add specific stack object to stack and set position and rotation
-		/// </summary>
-		/// <param name="iStackObject"></param>
+
+		#region PublicProperties
+
+		public bool IsStackCapacityFull => MaxCapacity == SpawnedStack.Count;
+		public int  CurrentUpgradePrice => upgradesData.upgrades[UpgradeLevel].upgradePrice;
+		public bool IsFullyUpgraded     => upgradesData == null || UpgradeLevel == upgradesData.upgrades.Length;
+
+		#endregion
+
+
+		//Methods
+
+
+		#region PublicMethods
+
 		public void AddStack(IStackObject iStackObject)
 		{
-			if (IsStackQuantityFull) return;
+			if (IsStackCapacityFull) return;
+			iStackObject._GameObject.transform.parent = stackPoint;
 			if (SpawnPoints != null) iStackObject.SetPositionRotation(SpawnPoints[SpawnedStack.Count], stackPoint.rotation);
 			SpawnedStack.Add(iStackObject);
 		}
 
-		/// <summary>
-		/// Instantiate stack object of given id and add stack and set position
-		/// </summary>
-		/// <param name="prefabID"></param>
 		public void AddStack(string prefabID)
 		{
-			if (IsStackQuantityFull) return;
-			var item         = Instantiate(SpawnPrefab(prefabID), stackPoint);
+			if (IsStackCapacityFull) return;
+			var item         = UnityEngine.Object.Instantiate(SpawnPrefab(prefabID), stackPoint);
 			var iStackObject = item.GetComponent<IStackObject>();
 			if (SpawnPoints != null) iStackObject.SetPositionRotation(SpawnPoints[SpawnedStack.Count], stackPoint.rotation);
 			SpawnedStack.Add(iStackObject);
 		}
 
 
-		/// <summary>
-		/// Add specific stack object to stack and out position and rotation for stack object
-		/// </summary>
-		/// <param name="iStackObject"></param>
-		/// <param name="pos"></param>
-		/// <param name="rot"></param>
-		/// <param name="localPosition"></param>
 		public void AddStack(IStackObject iStackObject, ref Vector3 pos, ref Quaternion rot)
 		{
-			if (IsStackQuantityFull) return;
+			if (IsStackCapacityFull) return;
 			if (SpawnPoints != null)
 			{
 				pos = formation.formationType == StackFormation.FormationType.Local ? SpawnPoints[SpawnedStack.Count] : stackPoint.transform.position + SpawnPoints[SpawnedStack.Count];
@@ -121,88 +111,28 @@ namespace GameDevUtils.StackSystem
 			SpawnedStack.Add(iStackObject);
 		}
 
-		/// <summary>
-		/// Find stack prefab for given id
-		/// </summary>
-		/// <param name="prefabID"></param>
-		/// <returns></returns>
-		private GameObject SpawnPrefab(string prefabID)
-		{
-			GameObject prefab = null;
-			foreach (StackPrefab stackObject in allStackPrefabs)
-			{
-				if (String.Equals(prefabID, stackObject.uniqueID))
-					return stackObject.prefab;
-			}
-
-			Debug.LogError($"Prefab ID {prefabID} not Available");
-			return prefab;
-		}
-
-		/// <summary>
-		/// Destroy Object form stack of stack object id if available
-		/// </summary>
-		/// <param name="stackObjectID"></param>
-		/// <param name="isAvailableInStack"></param>
-		public void RemoveStack(string stackObjectID, out bool isAvailableInStack)
+		public IStackObject RemoveStack(string stackObjectID)
 		{
 			IStackObject last = LastStackObject(stackObjectID);
-			if (last == null)
+			if (last != null)
 			{
-				isAvailableInStack = false;
-				return;
+				SpawnedStack.Remove(last);
+				RearrangeStack();
 			}
-
-			isAvailableInStack = true;
-			OnStackValueRemove?.Invoke();
-			SpawnedStack.Remove(last);
-			Destroy(last._GameObject);
-			RearrangeStack();
+			return last;
 		}
 
 
-		/// <summary>
-		/// Remove Passed stack object form stack 
-		/// </summary>
-		/// <param name="iStackObject"></param>
-		/// <param name="isDestroy"></param>
-		public void RemoveStack(IStackObject iStackObject, bool isDestroy = false)
+		public void RemoveStack(IStackObject iStackObject)
 		{
-			OnStackValueRemove?.Invoke();
 			SpawnedStack.Remove(iStackObject);
-			if (isDestroy)
-			{
-				Destroy(iStackObject._GameObject);
-			}
-
 			RearrangeStack();
 		}
-
-		/// <summary>
-		/// Find Last stack object of given id
-		/// </summary>
-		/// <param name="stackObjectID"></param>
-		/// <returns></returns>
-		private IStackObject LastStackObject(string stackObjectID)
-		{
-			IStackObject iStackObject = null;
-			for (int i = 0; i < SpawnedStack.Count; i++)
-			{
-				if (SpawnedStack[i].ID == stackObjectID)
-				{
-					iStackObject = SpawnedStack[i];
-					return iStackObject;
-				}
-			}
-
-			return iStackObject;
-		}
-
 
 		/// <summary>
 		/// Rearrange stack on the base formation
 		/// </summary>
-		void RearrangeStack()
+		public void RearrangeStack()
 		{
 			if (SpawnPoints == null || SpawnedStack == null || SpawnedStack.Count == 0) return;
 			for (var i = 0; i < SpawnedStack.Count; i++)
@@ -211,12 +141,220 @@ namespace GameDevUtils.StackSystem
 			}
 		}
 
-		/// <summary>
-		/// Upgrade Stack Capacity
-		/// </summary>
 		public void UpgradeStackCapacity()
 		{
 			UpgradeLevel++;
+		}
+
+		#endregion
+
+
+		#region PrivateMethods
+
+		/// <summary>
+		/// Find stack prefab for given id
+		/// </summary>
+		/// <param name="prefabID"></param>
+		/// <returns></returns>
+		private GameObject SpawnPrefab(string prefabID)
+		{
+			foreach (StackPrefab stackObject in allStackPrefabs)
+			{
+				if (String.Equals(prefabID, stackObject.uniqueID))
+					return stackObject.prefab;
+			}
+
+			Debug.LogError($"Prefab ID {prefabID} not Available");
+			return null;
+		}
+
+
+		/// <summary>
+		/// Find Last stack object of given id
+		/// </summary>
+		/// <param name="stackObjectID"></param>
+		/// <returns></returns>
+		private IStackObject LastStackObject(string stackObjectID)
+		{
+			for (int i = 0; i < SpawnedStack.Count; i++)
+			{
+				if (SpawnedStack[i].ID == stackObjectID)
+				{
+					return SpawnedStack[i];
+				}
+			}
+
+			return null;
+		}
+
+		#endregion
+
+	}
+
+	public class StackManager : MonoBehaviour
+	{
+
+		public delegate void StackValueRemoveDelegate(string stackName);
+
+		public event StackValueRemoveDelegate OnStackValueRemoveEvent;
+
+		public delegate void StackValueFullDelegate(string stackName);
+
+		public event StackValueFullDelegate OnStackValueFullEvent;
+
+
+		[SerializeField] private bool    isTestingMode;
+		[SerializeField]         Stack[] allStacks;
+
+
+		void Update()
+		{
+			if (isTestingMode)
+			{
+				foreach (var stack in allStacks)
+				{
+					stack.RearrangeStack();
+				}
+			}
+		}
+
+		/// <summary>
+		/// is that stack capacity full
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <returns></returns>
+		public bool IsCapacityFullOfStack(string stackName)
+		{
+			var stack = StackOfName(stackName);
+			return stack is {IsStackCapacityFull: true};
+		}
+
+		/// <summary>
+		/// Current upgrade of specific stack 
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <returns></returns>
+		public int CurrentUpgradePriceOfStack(string stackName)
+		{
+			var stack = StackOfName(stackName);
+			return stack != null ? StackOfName(stackName).CurrentUpgradePrice : 0;
+		}
+
+		/// <summary>
+		/// Is that stack is fully upgraded
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <returns></returns>
+		public bool IsStackFullyUpgraded(string stackName)
+		{
+			var stack = StackOfName(stackName);
+			return stack is {IsFullyUpgraded: true};
+		}
+
+
+		/// <summary>
+		/// Upgrade Capacity of specific stack
+		/// </summary>
+		/// <param name="stackName">Stack name which capacity to increase</param>
+		public void UpgradeStackCapacity(string stackName)
+		{
+			StackOfName(stackName)?.UpgradeStackCapacity();
+		}
+
+
+		/// <summary>
+		/// Add specific stack object to specific stack and set position and rotation
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <param name="iStackObject"></param>
+		public void AddStack(string stackName, IStackObject iStackObject)
+		{
+			var stack = StackOfName(stackName);
+			if(stack == null) return;
+			stack.AddStack(iStackObject);
+			if (stack.IsStackCapacityFull)
+				OnStackValueFullEvent?.Invoke(stackName);
+		}
+
+		/// <summary>
+		/// Instantiate and add stack object of specific stack of given id and set position
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <param name="prefabID"></param>
+		public void AddStack(string stackName, string prefabID)
+		{
+			var stack = StackOfName(stackName);
+			if(stack == null) return;
+			stack.AddStack(prefabID);
+			if (stack.IsStackCapacityFull)
+				OnStackValueFullEvent?.Invoke(stackName);
+		}
+
+
+		/// <summary>
+		/// Add specific stack object to specific stack and out position and rotation for stack object
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <param name="iStackObject"></param>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		public void AddStack(string stackName, IStackObject iStackObject, ref Vector3 pos, ref Quaternion rot)
+		{
+			var stack = StackOfName(stackName);
+			if(stack == null) return;
+			stack.AddStack(iStackObject, ref pos, ref rot);
+			if (stack.IsStackCapacityFull)
+				OnStackValueFullEvent?.Invoke(stackName);
+		}
+
+
+		/// <summary>
+		/// Remove stack object form specific stack for stack object id if available
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <param name="stackObjectID"></param>
+		public IStackObject RemoveStack(string stackName, string stackObjectID)
+		{
+			var stack = StackOfName(stackName);
+			if(stack == null) return null;
+			var iStackObject = stack.RemoveStack(stackObjectID);
+			if (iStackObject != null)
+				OnStackValueRemoveEvent?.Invoke(stackName);
+			return iStackObject;
+		}
+
+
+		/// <summary>
+		/// Remove Passed stack object form specific stack
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <param name="iStackObject"></param>
+		public void RemoveStack(string stackName, IStackObject iStackObject)
+		{
+			var stack = StackOfName(stackName);
+			if(stack == null) return;
+			stack.RemoveStack(iStackObject);
+			OnStackValueRemoveEvent?.Invoke(stackName);
+		}
+
+
+		/// <summary>
+		/// Return stack object of given name if available
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <returns></returns>
+		private Stack StackOfName(string stackName)
+		{
+			foreach (Stack stackItem in allStacks)
+			{
+				if (String.Equals(stackName, stackItem.uniqueStackName))
+				{
+					return stackItem;
+				}
+			}
+
+			Debug.LogError($"Stack With name {stackName} is not Available");
+			return null;
 		}
 
 	}

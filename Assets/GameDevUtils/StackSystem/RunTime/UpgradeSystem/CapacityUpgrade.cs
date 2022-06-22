@@ -11,6 +11,7 @@ namespace GameDevUtils.StackSystem.UpgradeSystem
 	{
 
 		//Inspector Fields 
+		[SerializeField]                 string       upgradeStackName;
 		[SerializeField] private         UpgradePopup upgradePopup;
 		[SerializeField] private         StackManager stackToUpgrade;
 		[SerializeField] private         Image        fillImage;
@@ -21,7 +22,7 @@ namespace GameDevUtils.StackSystem.UpgradeSystem
 		private bool IsStartFillAmount;
 
 		//Properties
-		private int UpgradePrice => stackToUpgrade.CurrentUpgradePrice;
+		private int UpgradePrice => stackToUpgrade.CurrentUpgradePriceOfStack(upgradeStackName);
 
 
 		void OnTriggerEnter(Collider other)
@@ -46,7 +47,7 @@ namespace GameDevUtils.StackSystem.UpgradeSystem
 
 		IEnumerator FillAmountCo()
 		{
-			while (!stackToUpgrade.IsFullyUpgraded && IsStartFillAmount && fillImage.fillAmount != 1)
+			while (!stackToUpgrade.IsStackFullyUpgraded(upgradeStackName) && IsStartFillAmount && fillImage.fillAmount != 1)
 			{
 				fillImage.fillAmount += fillAmount;
 				if (fillImage.fillAmount == 1)
@@ -71,7 +72,7 @@ namespace GameDevUtils.StackSystem.UpgradeSystem
 			if (CurrencySystem.CurrencyManager.Instance.TotalCurrencyFor("Coins") >= UpgradePrice)
 			{
 				CurrencySystem.CurrencyManager.Instance.SubtractCurrencyValue("Coins", UpgradePrice);
-				stackToUpgrade.UpgradeStackCapacity();
+				stackToUpgrade.UpgradeStackCapacity(upgradeStackName);
 				upgradePopup.OpenClosePopup(false);
 			}
 			else

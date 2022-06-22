@@ -12,30 +12,30 @@ public class BaseStackArea : MonoBehaviour
 
 	int _currentStack;
 
-	int CurrentStack
-	{
-		get => _currentStack;
-		set
-		{
-			_currentStack = value;
-			if (stackManager.IsStackQuantityFull)
-			{
-				OnStackValueFull?.Invoke();
-			}
-		}
-	}
+	// int CurrentStack
+	// {
+	// 	get => _currentStack;
+	// 	set
+	// 	{
+	// 		_currentStack = value;
+	// 		if (stackManager.IsStackQuantityFull)
+	// 		{
+	// 			OnStackValueFull?.Invoke();
+	// 		}
+	// 	}
+	// }
 
-	public bool IsAreaFUll => stackManager.IsStackQuantityFull;
-
-	public void StackValueUp()
-	{
-		CurrentStack++;
-	}
-
-	public void RemoveStackValue()
-	{
-		CurrentStack++;
-		OnStackValueRemove?.Invoke();
-	}
+	// public bool IsAreaFUll => stackManager.IsStackQuantityFull;
+	//
+	// public void StackValueUp()
+	// {
+	// 	CurrentStack++;
+	// }
+	//
+	// public void RemoveStackValue()
+	// {
+	// 	CurrentStack++;
+	// 	OnStackValueRemove?.Invoke();
+	// }
 
 }
