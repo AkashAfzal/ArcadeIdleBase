@@ -269,6 +269,8 @@ GameObject:
   - component: {fileID: 2177339947184666991}
   - component: {fileID: 2177339947184666990}
   - component: {fileID: 2177339947184666989}
+  - component: {fileID: 1503274892175655937}
+  - component: {fileID: 5704318331405003336}
   - component: {fileID: 2177339947184666976}
   m_Layer: 7
   m_Name: FollowCharacter
@@ -344,6 +346,33 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
+--- !u!114 &1503274892175655937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2177339947184666988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abab8ca193736fc46ae8c2e4ae52f503, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movement: {fileID: 2177339947184666976}
+--- !u!114 &5704318331405003336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2177339947184666988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e83bbcbbafb7bb40947bb2d5e6dd333, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coolDown: 0.7
+  timeScape: 0
 --- !u!114 &2177339947184666976
 MonoBehaviour:
   m_ObjectHideFlags: 0

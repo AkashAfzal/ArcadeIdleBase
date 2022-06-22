@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using GameDevUtils.StackSystem;
 
 public class SpawnerArea : MonoBehaviour
 {
@@ -8,21 +9,22 @@ public class SpawnerArea : MonoBehaviour
 	[SerializeField] GameObject spawnPrefab;
 	[SerializeField] Transform  spawnPosition;
 
-	BaseStackArea BaseStackArea;
-	bool          IsSpawnPrefabs;
+	public StackManager stackManager;
+	bool                IsSpawnPrefabs;
+	Vector3             pos;
+	Quaternion          rot;
 
 	void OnEnable()
 	{
-		BaseStackArea                    =  FindObjectOfType<BaseStackArea>();
-		BaseStackArea.OnStackValueRemove += StartSpawning;
-		BaseStackArea.OnStackValueFull   += StopSpawning;
-		if (!BaseStackArea.IsAreaFUll) StartSpawning();
+		stackManager.OnStackValueRemove += StartSpawning;
+		stackManager.OnStackValueFull   += StopSpawning;
+		if (!stackManager.IsStackQuantityFull) StartSpawning();
 	}
 
 	void OnDisable()
 	{
-		BaseStackArea.OnStackValueRemove -= StartSpawning;
-		BaseStackArea.OnStackValueFull   -= StopSpawning;
+		stackManager.OnStackValueRemove -= StartSpawning;
+		stackManager.OnStackValueFull   -= StopSpawning;
 		StopSpawning();
 	}
 
@@ -42,9 +44,17 @@ public class SpawnerArea : MonoBehaviour
 	{
 		while (IsSpawnPrefabs)
 		{
-			var follower = Instantiate(spawnPrefab, spawnPosition.position, spawnPosition.rotation);
-			follower.GetComponent<FollowerMovement>().MoveToTarget(BaseStackArea.targetPoint.position);
-			BaseStackArea.StackValueUp();
+			if (!stackManager.IsStackQuantityFull)
+			{
+				var follower = Instantiate(spawnPrefab, spawnPosition.position, spawnPosition.rotation);
+				stackManager.AddStack(follower.GetComponent<IStackObject>(), ref pos, ref rot);
+				follower.GetComponent<FollowerMovement>().MoveToTarget(pos,true);
+			}
+			else
+			{
+				yield break;
+			}
+			
 			yield return new WaitForSeconds(spawnRate);
 		}
 	}

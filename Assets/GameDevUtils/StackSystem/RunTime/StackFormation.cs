@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -6,18 +7,28 @@ namespace GameDevUtils.StackSystem
 {
 
 
-	public enum Formation
+	[Serializable]
+	public class StackFormation
 	{
 
-		F1,
-		F2
+		public enum Formation
+		{
 
-	}
+			ColumnsBase,
+			HeightBase
 
-	public class StackFormation : MonoBehaviour
-	{
+		}
 
-		public Formation formation = Formation.F1;
+		public enum FormationType
+		{
+
+			Local,
+			Global
+
+		}
+
+		public Formation     formation     = Formation.ColumnsBase;
+		public FormationType formationType = FormationType.Local;
 
 		[SerializeField, Min(1f)] private int   rows        = 1;
 		[SerializeField, Min(1f)] private int   columns     = 1;
@@ -30,14 +41,14 @@ namespace GameDevUtils.StackSystem
 
 		public void SetFormationValues(int stackMaxQuantity)
 		{
-			if (formation == Formation.F1)
+			if (formation == Formation.ColumnsBase)
 			{
 				while (StackMaxSize < stackMaxQuantity)
 				{
 					columns++;
 				}
 			}
-			else if (formation == Formation.F2)
+			else if (formation == Formation.HeightBase)
 			{
 				while (StackMaxSize < stackMaxQuantity)
 				{
@@ -49,7 +60,7 @@ namespace GameDevUtils.StackSystem
 
 		public IEnumerable<Vector3> EvaluatePoints()
 		{
-			return formation == Formation.F1 ? Formation1() : Formation2();
+			return formation == Formation.ColumnsBase ? Formation1() : Formation2();
 		}
 
 

@@ -1,11 +1,23 @@
+using GameDevUtils.StackSystem;
 using UnityEngine;
 
-public class Follower : MonoBehaviour
+public class Follower : MonoBehaviour, IStackObject
 {
+
+	public delegate void OnSetLeader(Leader leader);
 
 	public event OnSetLeader onSetLeader;
 
-	public delegate void OnSetLeader(Leader leader);
+	public string     ID          => "Follower";
+	public GameObject _GameObject => gameObject;
+
+	[SerializeField] FollowerMovement movement;
+
+	public void SetPositionRotation(Vector3 position, Quaternion rotation)
+	{
+		movement.MoveToTarget(position);
+	}
+
 
 	private CaptureCharacter CaptureCharacter;
 	private Leader           Leader;
@@ -19,6 +31,7 @@ public class Follower : MonoBehaviour
 
 	public void ActiveCharacter(Leader target)
 	{
+		if (movement.StopAtTargetPos) return;
 		if (Leader == target) return;
 		if (HasLeader()) Leader.MinusAgent();
 		CaptureCharacter.SetLeader(target);

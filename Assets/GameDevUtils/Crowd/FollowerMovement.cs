@@ -3,19 +3,33 @@ using GameDevUtils.CharacterController;
 using UnityEngine;
 using UnityEngine.AI;
 
+
+public enum FollowerState
+{
+
+	Idle,
+	MoveToTarget,
+	Following,
+	Attack,
+	Dead
+
+}
+
 [RequireComponent(typeof(Rigidbody), typeof(NavMeshAgent))]
 public class FollowerMovement : MonoBehaviour
 {
 
-	[SerializeField] private float        speedRun = 1;
-	[SerializeField] private Transform    target;
-	Rigidbody                             rigifBody;
-	[HideInInspector] public NavMeshAgent agent;
-	bool                                  moveToTarget;
-	Vector3                               targetPosition;
-	Vector3                               lookAtTarget;
+	[SerializeField]  private float        speedRun = 1;
+	[SerializeField]  private Transform    target;
+	[HideInInspector] public  NavMeshAgent agent;
 
-	public FreeMovementController playerController;
+	[HideInInspector] public bool    StopAtTargetPos;
+	bool    moveToTarget;
+	Vector3 targetPosition;
+	Vector3 lookAtTarget;
+
+	public  FreeMovementController playerController;
+	private Follower               follower;
 
 
 	private Animator animator;
@@ -40,10 +54,12 @@ public class FollowerMovement : MonoBehaviour
 
 	void Awake()
 	{
-		rigifBody   = GetComponent<Rigidbody>();
-		agent       = GetComponent<NavMeshAgent>();
-		agent.speed = speedRun;
-		agent.SetDestination(target.position);
+		agent                =  GetComponent<NavMeshAgent>();
+		follower             =  GetComponent<Follower>();
+		follower.onSetLeader += SetFollowTarget;
+		agent.speed          =  speedRun;
+		if (target != null && agent.isOnNavMesh)
+			agent.SetDestination(target.position);
 	}
 
 
@@ -62,11 +78,6 @@ public class FollowerMovement : MonoBehaviour
 		if (moveToTarget && agent.isOnNavMesh)
 		{
 			agent.SetDestination(targetPosition);
-			if (Vector3.Distance(transform.position, targetPosition) < 0.5f)
-			{
-				moveToTarget    = false;
-				agent.isStopped = true;
-			}
 		}
 
 		Animator.SetFloat("Value", !agent.isStopped ? speedRun : 0);
@@ -88,38 +99,54 @@ public class FollowerMovement : MonoBehaviour
 
 	void StopAgent()
 	{
-		agent.isStopped = playerController != null && playerController.IsPlayerInputApplied switch
+		if (moveToTarget && Vector3.Distance(transform.position, targetPosition) < 0.7f)
 		{
-			false when Vector3.Distance(transform.position, target.position) < 0.7f => true,
-			true                                                                    => false,
-			_                                                                       => agent.isStopped
-		};
+			agent.isStopped = true;
+			StopAtTargetPos = false;
+			moveToTarget    = false;
+		}
+		else if (playerController != null && playerController.IsPlayerInputApplied == false && Vector3.Distance(transform.position, target.position) < 0.7f)
+		{
+			agent.isStopped = true;
+		}
+		else if (playerController != null && playerController.IsPlayerInputApplied == true)
+		{
+			agent.isStopped = false;
+		}
 	}
 
 
-	public void SetFollowTarget(Transform followTarget, FreeMovementController controller)
+	public void SetFollowTarget(Leader leader)
 	{
-		target           = followTarget;
-		playerController = controller;
-		agent.SetDestination(target.position);
+		target           = leader.transform;
+		playerController = leader.GetComponent<FreeMovementController>();
+		if (agent.isOnNavMesh)
+			agent.SetDestination(target.position);
+	}
+
+	public void MoveToTarget(Vector3 targetPos, bool stopAtTargetPos)
+	{
+		StopAtTargetPos = stopAtTargetPos;
+		MoveToTarget(targetPos);
 	}
 
 	public void MoveToTarget(Vector3 targetPos)
 	{
-		moveToTarget   = true;
-		targetPosition = targetPos;
+		agent.isStopped = false;
+		moveToTarget    = true;
+		targetPosition  = targetPos;
 	}
 
 
 	void OnTriggerStay(Collider other)
 	{
-		if (!moveToTarget && !playerController.IsPlayerInputApplied && other.CompareTag("Follower"))
+		if (!moveToTarget && playerController != null && !playerController.IsPlayerInputApplied && other.CompareTag("Follower"))
 		{
 			if (other.GetComponent<FollowerMovement>().agent.isStopped)
 				agent.isStopped = true;
 		}
-		
-		if (moveToTarget && other.CompareTag("Follower"))
+
+		if (!StopAtTargetPos && moveToTarget && other.CompareTag("Follower"))
 		{
 			if (other.GetComponent<FollowerMovement>().agent.isStopped)
 				agent.isStopped = true;

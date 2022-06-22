@@ -21,12 +21,17 @@ namespace GameDevUtils.StackSystem
 	public class StackManager : MonoBehaviour
 	{
 
+		public event Action OnStackValueRemove;
+		public event Action OnStackValueFull;
+
 		//Public and Inspector Fields 
-		[SerializeField] private bool          isTestingMode;
-		[SerializeField] private UpgradesData  upgradesData;
-		[SerializeField] private int           initialCapacity = 10;
-		[SerializeField] private Transform     stackPoint;
-		[SerializeField] private StackPrefab[] allStackPrefabs;
+		[SerializeField] private bool           isTestingMode;
+		[SerializeField] private bool           withoutFormation;
+		[SerializeField] private StackFormation formation;
+		[SerializeField] private UpgradesData   upgradesData;
+		[SerializeField] private int            initialCapacity = 10;
+		[SerializeField] private Transform      stackPoint;
+		[SerializeField] private StackPrefab[]  allStackPrefabs;
 
 		//Private Fields
 		private readonly List<IStackObject> SpawnedStack = new List<IStackObject>();
@@ -36,16 +41,17 @@ namespace GameDevUtils.StackSystem
 		private int  UpgradeLevel        { get; set; } = 0;
 		private int  MaxCapacity         => initialCapacity + (upgradesData != null && UpgradeLevel != 0 ? upgradesData.upgrades[UpgradeLevel - 1].upgradeCapacity : 0);
 		public  int  CurrentUpgradePrice => upgradesData.upgrades[UpgradeLevel].upgradePrice;
-		public  bool IsStackQuantityFull => MaxCapacity == SpawnedStack.Count;
 		public  bool IsFullyUpgraded     => upgradesData == null || UpgradeLevel == upgradesData.upgrades.Length;
-
-		private StackFormation formation;
-		StackFormation Formation
+		public bool IsStackQuantityFull
 		{
 			get
 			{
-				if (formation == null) formation = GetComponent<StackFormation>();
-				return formation;
+				if (MaxCapacity == SpawnedStack.Count)
+				{
+					OnStackValueFull?.Invoke();
+				}
+
+				return MaxCapacity == SpawnedStack.Count;
 			}
 		}
 
@@ -53,12 +59,13 @@ namespace GameDevUtils.StackSystem
 		{
 			get
 			{
-				if (MaxCapacity > Formation.StackMaxSize)
+				if (withoutFormation) return null;
+				if (MaxCapacity > formation.StackMaxSize)
 				{
-					Formation.SetFormationValues(MaxCapacity);
+					formation.SetFormationValues(MaxCapacity);
 				}
 
-				return Formation.EvaluatePoints().ToList();
+				return formation.EvaluatePoints().ToList();
 			}
 		}
 
@@ -70,16 +77,55 @@ namespace GameDevUtils.StackSystem
 			}
 		}
 
+		/// <summary>
+		/// Add specific stack object to stack and set position and rotation
+		/// </summary>
+		/// <param name="iStackObject"></param>
+		public void AddStack(IStackObject iStackObject)
+		{
+			if (IsStackQuantityFull) return;
+			if (SpawnPoints != null) iStackObject.SetPositionRotation(SpawnPoints[SpawnedStack.Count], stackPoint.rotation);
+			SpawnedStack.Add(iStackObject);
+		}
 
+		/// <summary>
+		/// Instantiate stack object of given id and add stack and set position
+		/// </summary>
+		/// <param name="prefabID"></param>
 		public void AddStack(string prefabID)
 		{
 			if (IsStackQuantityFull) return;
 			var item         = Instantiate(SpawnPrefab(prefabID), stackPoint);
 			var iStackObject = item.GetComponent<IStackObject>();
-			iStackObject.SetPositionRotation(SpawnPoints[SpawnedStack.Count], stackPoint.rotation);
+			if (SpawnPoints != null) iStackObject.SetPositionRotation(SpawnPoints[SpawnedStack.Count], stackPoint.rotation);
 			SpawnedStack.Add(iStackObject);
 		}
 
+
+		/// <summary>
+		/// Add specific stack object to stack and out position and rotation for stack object
+		/// </summary>
+		/// <param name="iStackObject"></param>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		/// <param name="localPosition"></param>
+		public void AddStack(IStackObject iStackObject, ref Vector3 pos, ref Quaternion rot)
+		{
+			if (IsStackQuantityFull) return;
+			if (SpawnPoints != null)
+			{
+				pos = formation.formationType == StackFormation.FormationType.Local ? SpawnPoints[SpawnedStack.Count] : stackPoint.transform.position + SpawnPoints[SpawnedStack.Count];
+				rot = stackPoint.rotation;
+			}
+
+			SpawnedStack.Add(iStackObject);
+		}
+
+		/// <summary>
+		/// Find stack prefab for given id
+		/// </summary>
+		/// <param name="prefabID"></param>
+		/// <returns></returns>
 		private GameObject SpawnPrefab(string prefabID)
 		{
 			GameObject prefab = null;
@@ -93,6 +139,11 @@ namespace GameDevUtils.StackSystem
 			return prefab;
 		}
 
+		/// <summary>
+		/// Destroy Object form stack of stack object id if available
+		/// </summary>
+		/// <param name="stackObjectID"></param>
+		/// <param name="isAvailableInStack"></param>
 		public void RemoveStack(string stackObjectID, out bool isAvailableInStack)
 		{
 			IStackObject last = LastStackObject(stackObjectID);
@@ -103,11 +154,35 @@ namespace GameDevUtils.StackSystem
 			}
 
 			isAvailableInStack = true;
+			OnStackValueRemove?.Invoke();
 			SpawnedStack.Remove(last);
 			Destroy(last._GameObject);
 			RearrangeStack();
 		}
 
+
+		/// <summary>
+		/// Remove Passed stack object form stack 
+		/// </summary>
+		/// <param name="iStackObject"></param>
+		/// <param name="isDestroy"></param>
+		public void RemoveStack(IStackObject iStackObject, bool isDestroy = false)
+		{
+			OnStackValueRemove?.Invoke();
+			SpawnedStack.Remove(iStackObject);
+			if (isDestroy)
+			{
+				Destroy(iStackObject._GameObject);
+			}
+
+			RearrangeStack();
+		}
+
+		/// <summary>
+		/// Find Last stack object of given id
+		/// </summary>
+		/// <param name="stackObjectID"></param>
+		/// <returns></returns>
 		private IStackObject LastStackObject(string stackObjectID)
 		{
 			IStackObject iStackObject = null;
@@ -124,15 +199,21 @@ namespace GameDevUtils.StackSystem
 		}
 
 
+		/// <summary>
+		/// Rearrange stack on the base formation
+		/// </summary>
 		void RearrangeStack()
 		{
-			if (SpawnedStack == null || SpawnedStack.Count == 0) return;
+			if (SpawnPoints == null || SpawnedStack == null || SpawnedStack.Count == 0) return;
 			for (var i = 0; i < SpawnedStack.Count; i++)
 			{
-				SpawnedStack[i].SetPositionRotation(SpawnPoints[i], stackPoint.rotation);
+				SpawnedStack[i].SetPositionRotation(formation.formationType == StackFormation.FormationType.Local ? SpawnPoints[i] : SpawnPoints[i] + stackPoint.transform.position, stackPoint.rotation);
 			}
 		}
 
+		/// <summary>
+		/// Upgrade Stack Capacity
+		/// </summary>
 		public void UpgradeStackCapacity()
 		{
 			UpgradeLevel++;

@@ -1,12 +1,12 @@
 using System;
+using GameDevUtils.StackSystem;
 using UnityEngine;
 
 public class BaseStackArea : MonoBehaviour
 {
-
-	[SerializeField] int       maxCapacity;
-	public           Transform targetPoint;
-
+	public Transform    targetPoint;
+	public StackManager stackManager;
+	
 	public event Action OnStackValueRemove;
 	public event Action OnStackValueFull;
 
@@ -14,26 +14,28 @@ public class BaseStackArea : MonoBehaviour
 
 	int CurrentStack
 	{
-		get => -_currentStack;
+		get => _currentStack;
 		set
 		{
 			_currentStack = value;
-			if (_currentStack != maxCapacity)
-			{
-				OnStackValueRemove?.Invoke();
-			}
-			else if (_currentStack == maxCapacity)
+			if (stackManager.IsStackQuantityFull)
 			{
 				OnStackValueFull?.Invoke();
 			}
 		}
 	}
 
-	public bool IsAreaFUll => CurrentStack == maxCapacity;
+	public bool IsAreaFUll => stackManager.IsStackQuantityFull;
 
 	public void StackValueUp()
 	{
 		CurrentStack++;
+	}
+
+	public void RemoveStackValue()
+	{
+		CurrentStack++;
+		OnStackValueRemove?.Invoke();
 	}
 
 }
