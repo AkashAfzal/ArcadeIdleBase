@@ -4,21 +4,22 @@ using UnityEngine;
 
 public class BaseStackArea : MonoBehaviour
 {
-	
-	[SerializeField] StackManager stackManager;
 	[SerializeField] string       stackName;
-	[SerializeField] string       stackObjectId;
+	[SerializeField] StackManager stackManager;
 
 	public bool         IsCapacityFullOfStack => stackManager.IsCapacityFullOfStack(stackName);
+
+	bool                playerTriggered;
 	public event Action StartSpawnEvent;
 	public event Action StopSpawnEvent;
-	
-	
-	void OnEnable()
+
+
+	void Start()
 	{
 		stackManager.OnStackValueRemoveEvent += OnStackRemove;
 		stackManager.OnStackValueFullEvent   += OnStackFull;
-		if (!IsCapacityFullOfStack) StartSpawnEvent?.Invoke();;
+		if (!IsCapacityFullOfStack)
+			StartSpawnEvent?.Invoke();
 	}
 
 	void OnDisable()
@@ -30,7 +31,7 @@ public class BaseStackArea : MonoBehaviour
 
 	private void OnStackRemove(string invokedStackName)
 	{
-		if (String.Equals(invokedStackName, this.stackName))
+		if (String.Equals(invokedStackName, this.stackName) && !playerTriggered)
 		{
 			StartSpawnEvent?.Invoke();
 		}
@@ -38,7 +39,7 @@ public class BaseStackArea : MonoBehaviour
 	
 	private void OnStackFull(string invokedStackName)
 	{
-		if (String.Equals(invokedStackName, this.stackName))
+		if (String.Equals(invokedStackName, this.stackName) && !playerTriggered)
 		{
 			StopSpawnEvent?.Invoke();
 		}
@@ -58,13 +59,22 @@ public class BaseStackArea : MonoBehaviour
 			var playerStack = other.GetComponent<StackManager>();
 			if (playerStack != null)
 			{
+				playerTriggered = true;
 				StopSpawnEvent?.Invoke();
-				while (!stackManager.IsStackEmpty(stackName) || !playerStack.IsCapacityFullOfStack(stackName))
+				Debug.Log(stackManager.IsStackEmpty(stackName));
+				while (!playerStack.IsCapacityFullOfStack(stackName))
 				{
 					var iStackObject = stackManager.RemoveStack(stackName);
-					playerStack.AddStack(stackName, iStackObject);
-					iStackObject._GameObject.GetComponent<CaptureCharacter>().enabled = true;
-					iStackObject._GameObject.GetComponent<Follower>().ActiveCharacter(other.GetComponent<Leader>(), true);
+					if (iStackObject != null)
+					{
+						playerStack.AddStack(stackName, iStackObject);
+						iStackObject._GameObject.GetComponent<CaptureCharacter>().enabled = true;
+						iStackObject._GameObject.GetComponent<Follower>().ActiveCharacter(other.GetComponent<Leader>(), true);
+					}
+					else
+					{
+						break;
+					}
 				}
 			}
 		}
@@ -75,6 +85,7 @@ public class BaseStackArea : MonoBehaviour
 	{
 		if (other.CompareTag("Player") && other.GetComponent<StackManager>())
 		{
+			playerTriggered = false;
 			StartSpawnEvent?.Invoke();
 		}
 	}

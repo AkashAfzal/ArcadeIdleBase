@@ -27,6 +27,7 @@ public class SpawnerArea : MonoBehaviour
 
 	private void StartSpawning()
 	{
+		Debug.Log("dnjklashfdlkajsfhaslj");
 		IsSpawnPrefabs = true;
 		StartCoroutine(nameof(Spawn));
 	}

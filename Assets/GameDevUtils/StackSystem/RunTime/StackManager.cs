@@ -84,7 +84,7 @@ namespace GameDevUtils.StackSystem
 
 		public void AddStack(IStackObject iStackObject)
 		{
-			if (IsStackCapacityFull) return;
+			if (IsStackCapacityFull || iStackObject == null) return;
 			iStackObject._GameObject.transform.parent = stackPoint;
 			if (SpawnPoints != null) iStackObject.SetPositionRotation(SpawnPoints[SpawnedStack.Count], stackPoint.rotation);
 			SpawnedStack.Add(iStackObject);
@@ -102,7 +102,7 @@ namespace GameDevUtils.StackSystem
 
 		public void AddStack(IStackObject iStackObject, ref Vector3 pos, ref Quaternion rot)
 		{
-			if (IsStackCapacityFull) return;
+			if (IsStackCapacityFull || iStackObject == null) return;
 			if (SpawnPoints != null)
 			{
 				pos = formation.formationType == StackFormation.FormationType.Local ? SpawnPoints[SpawnedStack.Count] : stackPoint.transform.position + SpawnPoints[SpawnedStack.Count];
@@ -111,15 +111,16 @@ namespace GameDevUtils.StackSystem
 
 			SpawnedStack.Add(iStackObject);
 		}
-		
+
 		public IStackObject RemoveStack()
 		{
-			IStackObject last = SpawnedStack.Last();
+			IStackObject last = SpawnedStack.Count > 0 ? SpawnedStack.Last() : null;
 			if (last != null)
 			{
 				SpawnedStack.Remove(last);
 				RearrangeStack();
 			}
+
 			return last;
 		}
 
@@ -131,6 +132,7 @@ namespace GameDevUtils.StackSystem
 				SpawnedStack.Remove(last);
 				RearrangeStack();
 			}
+
 			return last;
 		}
 
@@ -229,8 +231,8 @@ namespace GameDevUtils.StackSystem
 				}
 			}
 		}
-		
-		
+
+
 		/// <summary>
 		/// is that stack capacity full
 		/// </summary>
@@ -294,7 +296,7 @@ namespace GameDevUtils.StackSystem
 		public void AddStack(string stackName, IStackObject iStackObject)
 		{
 			var stack = StackOfName(stackName);
-			if(stack == null) return;
+			if (stack == null) return;
 			stack.AddStack(iStackObject);
 			if (stack.IsStackCapacityFull)
 				OnStackValueFullEvent?.Invoke(stackName);
@@ -308,7 +310,7 @@ namespace GameDevUtils.StackSystem
 		public void AddStack(string stackName, string prefabID)
 		{
 			var stack = StackOfName(stackName);
-			if(stack == null) return;
+			if (stack == null) return;
 			stack.AddStack(prefabID);
 			if (stack.IsStackCapacityFull)
 				OnStackValueFullEvent?.Invoke(stackName);
@@ -325,13 +327,13 @@ namespace GameDevUtils.StackSystem
 		public void AddStack(string stackName, IStackObject iStackObject, ref Vector3 pos, ref Quaternion rot)
 		{
 			var stack = StackOfName(stackName);
-			if(stack == null) return;
+			if (stack == null) return;
 			stack.AddStack(iStackObject, ref pos, ref rot);
 			if (stack.IsStackCapacityFull)
 				OnStackValueFullEvent?.Invoke(stackName);
 		}
 
-		
+
 		/// <summary>
 		/// Remove stack object form specific stack for stack object id if available
 		/// </summary>
@@ -339,7 +341,7 @@ namespace GameDevUtils.StackSystem
 		public IStackObject RemoveStack(string stackName)
 		{
 			var stack = StackOfName(stackName);
-			if(stack == null) return null;
+			if (stack == null) return null;
 			var iStackObject = stack.RemoveStack();
 			if (iStackObject != null)
 				OnStackValueRemoveEvent?.Invoke(stackName);
@@ -354,7 +356,7 @@ namespace GameDevUtils.StackSystem
 		public IStackObject RemoveStack(string stackName, string stackObjectID)
 		{
 			var stack = StackOfName(stackName);
-			if(stack == null) return null;
+			if (stack == null) return null;
 			var iStackObject = stack.RemoveStack(stackObjectID);
 			if (iStackObject != null)
 				OnStackValueRemoveEvent?.Invoke(stackName);
@@ -370,7 +372,7 @@ namespace GameDevUtils.StackSystem
 		public void RemoveStack(string stackName, IStackObject iStackObject)
 		{
 			var stack = StackOfName(stackName);
-			if(stack == null) return;
+			if (stack == null) return;
 			stack.RemoveStack(iStackObject);
 			OnStackValueRemoveEvent?.Invoke(stackName);
 		}
