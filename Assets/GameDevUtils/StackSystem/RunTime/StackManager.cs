@@ -69,7 +69,8 @@ namespace GameDevUtils.StackSystem
 
 		#region PublicProperties
 
-		public bool IsStackCapacityFull => MaxCapacity == SpawnedStack.Count;
+		public bool IsStackCapacityFull => MaxCapacity        == SpawnedStack.Count;
+		public bool IsStackEmpty        => SpawnedStack.Count == 0;
 		public int  CurrentUpgradePrice => upgradesData.upgrades[UpgradeLevel].upgradePrice;
 		public bool IsFullyUpgraded     => upgradesData == null || UpgradeLevel == upgradesData.upgrades.Length;
 
@@ -109,6 +110,17 @@ namespace GameDevUtils.StackSystem
 			}
 
 			SpawnedStack.Add(iStackObject);
+		}
+		
+		public IStackObject RemoveStack()
+		{
+			IStackObject last = SpawnedStack.Last();
+			if (last != null)
+			{
+				SpawnedStack.Remove(last);
+				RearrangeStack();
+			}
+			return last;
 		}
 
 		public IStackObject RemoveStack(string stackObjectID)
@@ -217,6 +229,18 @@ namespace GameDevUtils.StackSystem
 				}
 			}
 		}
+		
+		
+		/// <summary>
+		/// is that stack capacity full
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <returns></returns>
+		public bool IsStackEmpty(string stackName)
+		{
+			var stack = StackOfName(stackName);
+			return stack is {IsStackCapacityFull: true};
+		}
 
 		/// <summary>
 		/// is that stack capacity full
@@ -307,6 +331,20 @@ namespace GameDevUtils.StackSystem
 				OnStackValueFullEvent?.Invoke(stackName);
 		}
 
+		
+		/// <summary>
+		/// Remove stack object form specific stack for stack object id if available
+		/// </summary>
+		/// <param name="stackName"></param>
+		public IStackObject RemoveStack(string stackName)
+		{
+			var stack = StackOfName(stackName);
+			if(stack == null) return null;
+			var iStackObject = stack.RemoveStack();
+			if (iStackObject != null)
+				OnStackValueRemoveEvent?.Invoke(stackName);
+			return iStackObject;
+		}
 
 		/// <summary>
 		/// Remove stack object form specific stack for stack object id if available

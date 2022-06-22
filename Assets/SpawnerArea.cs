@@ -4,41 +4,35 @@ using GameDevUtils.StackSystem;
 
 public class SpawnerArea : MonoBehaviour
 {
-
-	[SerializeField] string     stackName;
 	[SerializeField] float      spawnRate = 0.1f;
 	[SerializeField] GameObject spawnPrefab;
 	[SerializeField] Transform  spawnPosition;
 
-	public StackManager stackManager;
+	public BaseStackArea baseStack;
 	bool                IsSpawnPrefabs;
 	Vector3             pos;
 	Quaternion          rot;
 
 	void OnEnable()
 	{
-		stackManager.OnStackValueRemoveEvent += StartSpawning;
-		stackManager.OnStackValueFullEvent   += StopSpawning;
-		if (!stackManager.IsCapacityFullOfStack(stackName)) StartSpawning(stackName);
+		baseStack.StartSpawnEvent += StartSpawning;
+		baseStack.StopSpawnEvent   += StopSpawning;
 	}
 
 	void OnDisable()
 	{
-		stackManager.OnStackValueRemoveEvent -= StartSpawning;
-		stackManager.OnStackValueFullEvent   -= StopSpawning;
-		StopSpawning(stackName);
+		baseStack.StartSpawnEvent -= StartSpawning;
+		baseStack.StopSpawnEvent  -= StopSpawning;
 	}
 
-	private void StartSpawning(string stackName)
+	private void StartSpawning()
 	{
-		if (stackName != this.stackName) return;
 		IsSpawnPrefabs = true;
 		StartCoroutine(nameof(Spawn));
 	}
 
-	private void StopSpawning(string stackName)
+	private void StopSpawning()
 	{
-		if (stackName != this.stackName) return;
 		IsSpawnPrefabs = false;
 		StopCoroutine(nameof(Spawn));
 	}
@@ -47,10 +41,10 @@ public class SpawnerArea : MonoBehaviour
 	{
 		while (IsSpawnPrefabs)
 		{
-			if (!stackManager.IsCapacityFullOfStack(stackName))
+			if (!baseStack.IsCapacityFullOfStack)
 			{
 				var follower = Instantiate(spawnPrefab, spawnPosition.position, spawnPosition.rotation);
-				stackManager.AddStack(stackName,follower.GetComponent<IStackObject>(), ref pos, ref rot);
+				baseStack.AddStack(follower.GetComponent<IStackObject>(), ref pos, ref rot);
 				follower.GetComponent<FollowerMovement>().MoveToTarget(pos, true);
 			}
 			else

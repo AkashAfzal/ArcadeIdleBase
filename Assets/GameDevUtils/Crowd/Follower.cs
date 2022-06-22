@@ -29,8 +29,9 @@ public class Follower : MonoBehaviour, IStackObject
 		CaptureCharacter = GetComponent<CaptureCharacter>();
 	}
 
-	public void ActiveCharacter(Leader target)
+	public void ActiveCharacter(Leader target, bool forceFollow = false)
 	{
+		if (forceFollow) movement.StopAtTargetPos = false;
 		if (movement.StopAtTargetPos) return;
 		if (Leader == target) return;
 		if (HasLeader()) Leader.MinusAgent();

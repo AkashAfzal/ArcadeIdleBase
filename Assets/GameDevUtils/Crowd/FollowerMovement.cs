@@ -118,6 +118,7 @@ public class FollowerMovement : MonoBehaviour
 
 	public void SetFollowTarget(Leader leader)
 	{
+		moveToTarget     = false;
 		target           = leader.transform;
 		playerController = leader.GetComponent<FreeMovementController>();
 		if (agent.isOnNavMesh)

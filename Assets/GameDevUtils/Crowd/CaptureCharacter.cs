@@ -34,7 +34,7 @@ public class CaptureCharacter : MonoBehaviour
 
     private void InviteFollower(Collider other)
     {
-        if (Leader == null || timeScape > 0)
+        if (Leader == null || timeScape > 0 || !other.GetComponent<CaptureCharacter>().enabled)
         {
             return;
         }
