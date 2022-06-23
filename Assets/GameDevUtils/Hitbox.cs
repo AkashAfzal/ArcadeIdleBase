@@ -5,7 +5,14 @@ using UnityEngine;
 public class Hitbox : MonoBehaviour
 {
 
-	[HideInInspector] public int damage;
+	private                  GameObject Target;
+	[HideInInspector] public int        damage;
+
+
+	public void AttackTarget(GameObject target)
+	{
+		Target = target;
+	}
 
 	void ApplyDamage(IDamageable iDamageable)
 	{
@@ -15,14 +22,14 @@ public class Hitbox : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		// Debug.Log(other.name);
-		var iDamageAble = other.GetComponent<IDamageable>();
-		if (iDamageAble != null)
+		if (Target != null && Target.gameObject == other.gameObject)
 		{
-			// Debug.Log("dAMAGE");
-			ApplyDamage(iDamageAble);
+			var iDamageAble = other.GetComponent<IDamageable>();
+			if (iDamageAble != null)
+			{
+				ApplyDamage(iDamageAble);
+			}
 		}
-		
 	}
 
 }

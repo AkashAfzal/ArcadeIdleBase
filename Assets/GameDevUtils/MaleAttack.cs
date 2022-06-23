@@ -9,6 +9,7 @@ public class MaleAttack : AttackBase
 
 	public override void Attack()
 	{
+		Debug.Log("AtCk");
 		followerMovement.Animator.SetBool("Attack", true);
 	}
 
