@@ -10,7 +10,7 @@ public class MaleAttack : AttackBase
 	public override void Attack()
 	{
 		Debug.Log("AtCk");
-		followerMovement.Animator.SetBool("Attack", true);
+		follower.Animator.SetBool("Attack", true);
 	}
 
 	public override void Search()

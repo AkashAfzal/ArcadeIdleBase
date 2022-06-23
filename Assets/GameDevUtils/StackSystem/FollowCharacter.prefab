@@ -269,7 +269,6 @@ GameObject:
   - component: {fileID: 2177339947184666991}
   - component: {fileID: 2177339947184666990}
   - component: {fileID: 2177339947184666989}
-  - component: {fileID: 1503274892175655937}
   - component: {fileID: 5704318331405003336}
   - component: {fileID: 2177339947184666976}
   - component: {fileID: 6145292809938500611}
@@ -347,19 +346,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
---- !u!114 &1503274892175655937
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2177339947184666988}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abab8ca193736fc46ae8c2e4ae52f503, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  movement: {fileID: 2177339947184666976}
 --- !u!114 &5704318331405003336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,12 +372,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cb0e77b62a95db488945541fe0237c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentState: 0
+  movementSpeed: 1
+  agent: {fileID: 2177339947184666989}
+  animator: {fileID: 1544942204265229256}
   healthSystem:
     m_MaxHealth: 100
-  speedRun: 2
   target: {fileID: 0}
-  agent: {fileID: 0}
   StopAtTargetPos: 0
   playerController: {fileID: 0}
 --- !u!114 &6145292809938500611
@@ -407,12 +393,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackState: 0
-  followerMovement: {fileID: 2177339947184666976}
+  opponentLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  follower: {fileID: 2177339947184666976}
   damage: 15
+  attackRadius: 0
   searchRadius: 0
   hitBoxes:
   - {fileID: 515157639773807505}
   - {fileID: 1822153029296643434}
+  m_PunchParticles: {fileID: 0}
 --- !u!1 &2225568577733508023
 GameObject:
   m_ObjectHideFlags: 0

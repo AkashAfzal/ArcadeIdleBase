@@ -44,9 +44,10 @@ public class SpawnerArea : MonoBehaviour
 		{
 			if (!baseStack.IsCapacityFullOfStack)
 			{
-				var follower = Instantiate(spawnPrefab, spawnPosition.position, spawnPosition.rotation);
+				// Vector3 pos      = Vector3.one;
+				var     follower = Instantiate(spawnPrefab, spawnPosition.position, spawnPosition.rotation);
 				baseStack.AddStack(follower.GetComponent<IStackObject>(), ref pos, ref rot);
-				follower.GetComponent<FollowerMovement>().MoveToTarget(pos, true);
+				follower.GetComponent<Follower>().MoveToTarget(pos, true);
 			}
 			else
 			{
