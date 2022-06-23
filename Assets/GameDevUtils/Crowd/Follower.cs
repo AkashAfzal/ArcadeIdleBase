@@ -90,7 +90,7 @@ public class Follower : AIBase, IStackObject
 
 	protected override void OnFixedUpdate()
 	{
-		if (movementState == MovementState.Follow && target != null && playerController != null && playerController.IsPlayerInputApplied && )
+		if (movementState == MovementState.Follow && target != null && playerController != null && playerController.IsPlayerInputApplied)
 			canMove = true;
 
 		Move(AgentTargetPosition, canMove);
