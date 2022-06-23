@@ -1,5 +1,5 @@
-using System;
 using GameDevUtils.CharacterController;
+using GameDevUtils.HealthSystem;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,26 +10,30 @@ public enum FollowerState
 	Idle,
 	MoveToTarget,
 	Following,
+	Search,
 	Attack,
 	Dead
 
 }
 
 [RequireComponent(typeof(Rigidbody), typeof(NavMeshAgent))]
-public class FollowerMovement : MonoBehaviour
+public class FollowerMovement : MonoBehaviour, IDamageable
 {
 
-	[SerializeField]  private float        speedRun = 1;
-	[SerializeField]  private Transform    target;
-	[HideInInspector] public  NavMeshAgent agent;
+	public                    FollowerState currentState;
+	[SerializeField]          HealthSystem  healthSystem;
+	[SerializeField]  private float         speedRun = 1;
+	[SerializeField]  private Transform     target;
+	[HideInInspector] public  NavMeshAgent  agent;
 
-	[HideInInspector] public bool    StopAtTargetPos;
-	bool    moveToTarget;
-	Vector3 targetPosition;
-	Vector3 lookAtTarget;
+	[HideInInspector] public bool StopAtTargetPos;
+	bool                          moveToTarget;
+	Vector3                       targetPosition;
+	Vector3                       lookAtTarget;
 
 	public  FreeMovementController playerController;
 	private Follower               follower;
+	public  bool                   IsDestroyed { get; set; }
 
 
 	private Animator animator;
@@ -60,6 +64,7 @@ public class FollowerMovement : MonoBehaviour
 		agent.speed          =  speedRun;
 		if (target != null && agent.isOnNavMesh)
 			agent.SetDestination(target.position);
+		// healthSystem.OnDeath += () => { gameObject.SetActive(false); };
 	}
 
 
@@ -152,6 +157,16 @@ public class FollowerMovement : MonoBehaviour
 			if (other.GetComponent<FollowerMovement>().agent.isStopped)
 				agent.isStopped = true;
 		}
+	}
+
+	public void Damage(float damageAmount, Vector3 hitPoint)
+	{
+		healthSystem.TakeDamage(damageAmount, hitPoint);
+	}
+
+	public void DestroyObject()
+	{
+		healthSystem.Death();
 	}
 
 }

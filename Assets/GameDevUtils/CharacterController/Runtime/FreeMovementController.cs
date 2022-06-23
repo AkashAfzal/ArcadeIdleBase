@@ -1,18 +1,20 @@
 using UnityEngine;
 using GameDevUtils.CharacterController.InputSystem;
+using GameDevUtils.HealthSystem;
 
 
 namespace GameDevUtils.CharacterController
 {
 
 
-	public class FreeMovementController : BaseController
+	public class FreeMovementController : BaseController, IDamageable
 	{
 
-		[SerializeField] float maxForwardSpeed;
-		[SerializeField] float forwardSpeedAcceleration;
-		[SerializeField] float forwardSpeedDeceleration;
-		[SerializeField] float rotationSpeed;
+		[SerializeField] HealthSystem.HealthSystem healthSystem;
+		[SerializeField] float                     maxForwardSpeed;
+		[SerializeField] float                     forwardSpeedAcceleration;
+		[SerializeField] float                     forwardSpeedDeceleration;
+		[SerializeField] float                     rotationSpeed;
 
 		//Private Fields
 		float         forwardSpeed;
@@ -22,6 +24,7 @@ namespace GameDevUtils.CharacterController
 		JoyStickInput joyStickInput;
 
 		public bool IsPlayerInputApplied => joyStickInput?.JoystickDirection.magnitude > 0.1f;
+		public bool IsDestroyed          { get; set; }
 
 
 		protected override void Init()
@@ -74,6 +77,16 @@ namespace GameDevUtils.CharacterController
 			float normVerticalSpeed = velocity.magnitude / (maxForwardSpeed / 3f);
 			Animator.SetFloat("Value", normVerticalSpeed > 0.15f ? normVerticalSpeed : 0);
 			Animator.speed = normVerticalSpeed > 0.15f ? maxForwardSpeed / 2 : 1;
+		}
+
+		public void Damage(float damageAmount, Vector3 hitPoint)
+		{
+			healthSystem.TakeDamage(damageAmount, hitPoint);
+		}
+
+		public void DestroyObject()
+		{
+			healthSystem.Death();
 		}
 
 	}
