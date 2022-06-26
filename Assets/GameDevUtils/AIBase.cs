@@ -14,7 +14,9 @@ public abstract class AIBase : MonoBehaviour, IDamageable
 	
 	public Animator     Animator    => animator;
 	public NavMeshAgent Agent       => agent;
-	public bool         IsDestroyed { get; set; }
+
+	public bool isAgentStopped => Agent.isStopped;
+	public bool IsDestroyed    { get; set; }
 
 	void Start()
 	{
@@ -36,7 +38,7 @@ public abstract class AIBase : MonoBehaviour, IDamageable
 
 	protected abstract void OnFixedUpdate();
 
-	protected void Move(Vector3 targetPosition, bool canMove)
+	protected void Move(Vector3 targetPosition, Vector3 lookAtTarget, bool canMove)
 	{
 		agent.isStopped = !canMove;
 		if (canMove && agent.isOnNavMesh)
@@ -44,7 +46,7 @@ public abstract class AIBase : MonoBehaviour, IDamageable
 			agent.speed     = movementSpeed;
 			agent.SetDestination(targetPosition);
 		}
-
+		transform.LookAt(lookAtTarget);
 		Animator.SetFloat("Value", canMove ? movementSpeed : 0);
 	}
 
