@@ -6,14 +6,14 @@ using GameDevUtils.HealthSystem;
 [RequireComponent(typeof(Rigidbody))]
 public abstract class AIBase : MonoBehaviour, IDamageable
 {
-	
-	[SerializeField] private float        movementSpeed = 1;
-	[SerializeField] private NavMeshAgent agent;
-	[SerializeField] private Animator     animator;
-	[SerializeField]         HealthSystem healthSystem;
-	
-	public Animator     Animator    => animator;
-	public NavMeshAgent Agent       => agent;
+
+	[SerializeField] protected float        movementSpeed = 1;
+	[SerializeField] private   NavMeshAgent agent;
+	[SerializeField] private   Animator     animator;
+	[SerializeField]           HealthSystem healthSystem;
+
+	public Animator     Animator => animator;
+	public NavMeshAgent Agent    => agent;
 
 	public bool isAgentStopped => Agent.isStopped;
 	public bool IsDestroyed    { get; set; }
@@ -22,32 +22,33 @@ public abstract class AIBase : MonoBehaviour, IDamageable
 	{
 		Init();
 	}
-	
+
 	void Update()
 	{
 		OnUpdate();
 	}
-	
+
 	void FixedUpdate()
 	{
 		OnFixedUpdate();
 	}
 
 	protected abstract void Init();
+
 	protected abstract void OnUpdate();
 
 	protected abstract void OnFixedUpdate();
 
-	protected void Move(Vector3 targetPosition, Vector3 lookAtTarget, bool canMove)
+	protected void Move(Vector3 targetPosition, Vector3 lookAtTarget, float speed, bool canMove)
 	{
-		
-		if(agent == null || !agent.isOnNavMesh) return;
+		if (agent == null || !agent.isOnNavMesh) return;
 		agent.isStopped = !canMove;
 		if (canMove && agent.isOnNavMesh)
 		{
-			agent.speed     = movementSpeed;
+			agent.speed = speed;
 			agent.SetDestination(targetPosition);
 		}
+
 		transform.LookAt(lookAtTarget);
 		Animator.SetFloat("Value", canMove ? movementSpeed : 0);
 	}

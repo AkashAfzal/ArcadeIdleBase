@@ -109,7 +109,7 @@ public class Follower : AIBase, IStackObject
 
 	protected override void OnFixedUpdate()
 	{
-		Move(AgentTargetPosition, LookAtTarget, CanMove);
+		Move(AgentTargetPosition, LookAtTarget, movementSpeed, CanMove);
 	}
 
 
