@@ -23,7 +23,7 @@ public class Follower : AIBase, IStackObject
 	{
 		MoveToTarget(position);
 	}
-	
+
 	//Private Fields
 	private bool                   StopAtTargetPos;
 	private Leader                 Leader;
@@ -32,12 +32,12 @@ public class Follower : AIBase, IStackObject
 	private CaptureCharacter       CaptureCharacter;
 	private FreeMovementController PlayerController;
 	private MovementState          MovementState = MovementState.MoveToTarget;
-	
+
 
 	//Properties
 	public Leader GetLeader => Leader;
-	
-	bool          _canMove;
+
+	bool _canMove;
 	bool CanMove
 	{
 		get
@@ -52,7 +52,7 @@ public class Follower : AIBase, IStackObject
 				case MovementState.Follow when PlayerController != null && PlayerController.IsPlayerInputApplied == false && Vector3.Distance(transform.position, FollowTarget.position) < 0.7f:
 					_canMove = false;
 					return _canMove;
-
+				
 				case MovementState.Follow when FollowTarget != null && PlayerController != null && PlayerController.IsPlayerInputApplied:
 					_canMove = true;
 					return _canMove;
@@ -78,17 +78,20 @@ public class Follower : AIBase, IStackObject
 		}
 	}
 
+	Vector3 _lookAtTarget;
+
 	Vector3 LookAtTarget
 	{
 		get
 		{
-			return MovementState switch
+			_lookAtTarget = MovementState switch
 			{
-				MovementState.MoveToTarget                                                                                     => MoveToTargetPosition,
-				MovementState.Follow when PlayerController != null && PlayerController.IsPlayerInputApplied                    => FollowTarget.position,
-				MovementState.Follow when PlayerController != null && !PlayerController.IsPlayerInputApplied && isAgentStopped => PlayerController.gameObject.transform.position,
-				_                                                                                                              => LookAtTarget
+				MovementState.MoveToTarget                                                                                      => MoveToTargetPosition,
+				MovementState.Follow when PlayerController != null && PlayerController.IsPlayerInputApplied                     => FollowTarget.position,
+				MovementState.Follow when PlayerController != null && !PlayerController.IsPlayerInputApplied && isAgentStopped  => PlayerController.gameObject.transform.position,
+				_                                                                                                               => _lookAtTarget
 			};
+			return _lookAtTarget;
 		}
 	}
 
@@ -126,8 +129,7 @@ public class Follower : AIBase, IStackObject
 		MovementState    = MovementState.Follow;
 		FollowTarget     = Leader.transform;
 		PlayerController = Leader.GetComponent<FreeMovementController>();
-		if (Agent.isOnNavMesh)
-			Agent.SetDestination(FollowTarget.position);
+		Agent.SetDestination(FollowTarget.position);
 	}
 
 	public void MoveToTarget(Vector3 targetPos, bool stopAtTargetPos)

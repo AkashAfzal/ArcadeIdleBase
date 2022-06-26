@@ -61,7 +61,6 @@ public class BaseStackArea : MonoBehaviour
 			{
 				playerTriggered = true;
 				StopSpawnEvent?.Invoke();
-				Debug.Log(stackManager.IsStackEmpty(stackName));
 				while (!playerStack.IsCapacityFullOfStack(stackName))
 				{
 					var iStackObject = stackManager.RemoveStack(stackName);

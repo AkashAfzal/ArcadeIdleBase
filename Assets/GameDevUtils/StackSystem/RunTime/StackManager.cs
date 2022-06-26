@@ -70,6 +70,8 @@ namespace GameDevUtils.StackSystem
 		#region PublicProperties
 
 		public bool IsStackCapacityFull => MaxCapacity        == SpawnedStack.Count;
+		
+		public int StackCount =>  SpawnedStack.Count;
 		public bool IsStackEmpty        => SpawnedStack.Count == 0;
 		public int  CurrentUpgradePrice => upgradesData.upgrades[UpgradeLevel].upgradePrice;
 		public bool IsFullyUpgraded     => upgradesData == null || UpgradeLevel == upgradesData.upgrades.Length;
@@ -241,7 +243,7 @@ namespace GameDevUtils.StackSystem
 		public bool IsStackEmpty(string stackName)
 		{
 			var stack = StackOfName(stackName);
-			return stack is {IsStackCapacityFull: true};
+			return stack?.IsStackEmpty ?? true;
 		}
 
 		/// <summary>
@@ -252,7 +254,18 @@ namespace GameDevUtils.StackSystem
 		public bool IsCapacityFullOfStack(string stackName)
 		{
 			var stack = StackOfName(stackName);
-			return stack is {IsStackCapacityFull: true};
+			return stack?.IsStackCapacityFull ?? false;
+		}
+		
+		/// <summary>
+		/// Current Count Of Stack
+		/// </summary>
+		/// <param name="stackName"></param>
+		/// <returns></returns>
+		public int CurrentCountOfStack(string stackName)
+		{
+			var stack = StackOfName(stackName);
+			return stack?.StackCount ?? 0;
 		}
 
 		/// <summary>
@@ -274,7 +287,7 @@ namespace GameDevUtils.StackSystem
 		public bool IsStackFullyUpgraded(string stackName)
 		{
 			var stack = StackOfName(stackName);
-			return stack is {IsFullyUpgraded: true};
+			return stack?.IsFullyUpgraded ?? false;
 		}
 
 

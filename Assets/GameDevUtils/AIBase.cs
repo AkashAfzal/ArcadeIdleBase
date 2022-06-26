@@ -40,6 +40,8 @@ public abstract class AIBase : MonoBehaviour, IDamageable
 
 	protected void Move(Vector3 targetPosition, Vector3 lookAtTarget, bool canMove)
 	{
+		
+		if(agent == null || !agent.isOnNavMesh) return;
 		agent.isStopped = !canMove;
 		if (canMove && agent.isOnNavMesh)
 		{
