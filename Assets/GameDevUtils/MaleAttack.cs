@@ -9,8 +9,7 @@ public class MaleAttack : AttackBase
 
 	public override void Attack()
 	{
-		Debug.Log("AtCk");
-		follower.Animator.SetBool("Attack", true);
+		controller.Animator.SetBool("Attack", true);
 	}
 
 	public override void Search()
@@ -25,7 +24,7 @@ public class MaleAttack : AttackBase
 
 	void OnTriggerEnter(Collider other)
 	{
-		if (other.GetComponent<IDamageable>() != null)
+		if (other.GetComponent<Enemy>() && other.GetComponent<IDamageable>() != null)
 		{
 			Attack();
 		}

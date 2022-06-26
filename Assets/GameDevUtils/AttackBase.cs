@@ -26,37 +26,39 @@ public enum AttackState
 
 public abstract class AttackBase : MonoBehaviour, IAttack
 {
-	[SerializeField] protected AttackState      attackState = AttackState.None;
-	[SerializeField] protected LayerMask        opponentLayerMask;
-	[SerializeField] protected Follower follower;
-	[SerializeField] protected int              damage;
-	[SerializeField] protected float            attackRadius;
-	[SerializeField] protected float            searchRadius;
-	[SerializeField]           Hitbox[]         hitBoxes;
+	
+	[SerializeField] protected AttackState attackState = AttackState.None;
+	[SerializeField] protected bool        canDetectEnemy;
+	[SerializeField] protected LayerMask   opponentLayerMask;
+	[SerializeField] protected AIBase      controller;
+	[SerializeField] protected int         damage;
+	[SerializeField] protected float       attackRadius;
+	[SerializeField] protected float       searchRadius;
+	[SerializeField]           Hitbox[]    hitBoxes;
 	
 	[SerializeField] private ParticleSystem m_PunchParticles;
-
+	
 	protected Collider[] m_NearEnemies = new Collider[5];
 	protected AttackBase nearFightController;
 	protected bool       CanFight = false;
 	protected GameObject target;
-
-
-	void Start()
-	{
-		Init();
-	}
-
-	protected virtual void Init()
-	{
-		SetDamageForHitBoxes();
-	}
-	
-	
+	//
+	//
+	// void Start()
+	// {
+	// 	Init();
+	// }
+	//
+	// protected virtual void Init()
+	// {
+	// 	SetDamageForHitBoxes();
+	// }
+	//
+	//
 	// protected virtual void FixedUpdate()
 	// {
 	// 	var detectionLevel = EnemyDetection();
-	// 	if (target && !followerMovement.Animator.applyRootMotion && (CurrentState is {CanDoAction: true} || attackState == AttackState.MoveToWardsTarget))
+	// 	if (target && !controller.Animator.applyRootMotion && (CurrentState is {CanDoAction: true} || attackState == AttackState.MoveToWardsTarget))
 	// 	{
 	// 		Movement(detectionLevel);
 	// 	}
@@ -64,12 +66,10 @@ public abstract class AttackBase : MonoBehaviour, IAttack
 	//
 	// protected virtual float EnemyDetection()
 	// {
-	// 	float detectionLevel = 0;
-	// 	CanFight = false;
+	// 	
 	// 	if (Physics.OverlapSphereNonAlloc(transform.position, attackRadius, m_NearEnemies, opponentLayerMask) > 0)
 	// 	{
-	// 		CanFight = true;
-	// 		return detectionLevel;
+	// 		controller
 	// 	}
 	//
 	// 	if (Physics.OverlapSphereNonAlloc(transform.position, m_Parameters.sneakRadius, m_NearEnemies, m_EnemyLayerMask) > 0)
@@ -134,4 +134,3 @@ public abstract class AttackBase : MonoBehaviour, IAttack
 	}
 
 }
-
