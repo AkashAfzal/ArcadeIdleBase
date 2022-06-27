@@ -68,7 +68,7 @@ public class BaseStackArea : MonoBehaviour
 					{
 						playerStack.AddStack(stackName, iStackObject);
 						iStackObject._GameObject.GetComponent<CaptureCharacter>().enabled = true;
-						iStackObject._GameObject.GetComponent<Follower>().ActiveCharacter(other.GetComponent<Leader>(), true);
+						iStackObject._GameObject.GetComponent<Follower>().ActiveCharacter(other.GetComponent<FightLeader>(), true);
 					}
 					else
 					{

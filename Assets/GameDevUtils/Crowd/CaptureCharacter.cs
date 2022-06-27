@@ -2,13 +2,10 @@ using UnityEngine;
 
 public class CaptureCharacter : MonoBehaviour
 {
-
-	// [SerializeField] private int agentPerLeader;
-	// [SerializeField] private GameObject agentPrefab;
 	[SerializeField] private float coolDown  = 0.7f;
 	[SerializeField] private float timeScape = 0;
 
-	private Leader Leader;
+	private FightLeader FightLeader;
 
 	private void Start()
 	{
@@ -28,14 +25,14 @@ public class CaptureCharacter : MonoBehaviour
 		InviteFollower(other);
 	}
 
-	public void SetLeader(Leader leader)
+	public void SetLeader(FightLeader fightLeader)
 	{
-		Leader = leader;
+		FightLeader = fightLeader;
 	}
 
 	private void InviteFollower(Collider other)
 	{
-		if (Leader == null || timeScape > 0)
+		if (FightLeader == null || timeScape > 0)
 		{
 			return;
 		}
@@ -43,29 +40,14 @@ public class CaptureCharacter : MonoBehaviour
 		if (other.GetComponent<CaptureCharacter>() && !other.GetComponent<CaptureCharacter>().enabled) return;
 		
 		Follower captureMover = other.gameObject.GetComponent<Follower>();
-		// Leader    enemyLeader  = other.gameObject.GetComponent<Leader>();
 		if (captureMover != null)
 		{
-			if (captureMover.GetLeader == null || captureMover.GetLeader.AgentCount < Leader.AgentCount)
+			if (captureMover.GetFightLeader == null || captureMover.GetFightLeader.playerStack.CurrentCountOfStack("Followers") < FightLeader.playerStack.CurrentCountOfStack("Followers"))
 			{
-				captureMover.GetComponent<Follower>().ActiveCharacter(Leader);
+				captureMover.GetComponent<Follower>().ActiveCharacter(FightLeader);
 				timeScape = coolDown;
 			}
 		}
-		// else if (enemyLeader != null)
-		// {
-		//     if (enemyLeader.AgentCount < 2 && Leader.AgentCount > 1)
-		//     {
-		//         Vector3 spawnPos = other.gameObject.transform.position;
-		//         Destroy(other.gameObject);
-		//         for (int i = 0; i < agentPerLeader; i++)
-		//         {
-		//             GameObject newAgent = Instantiate(agentPrefab, new Vector3 (spawnPos.x, 2.5f, spawnPos.z), Quaternion.identity);
-		//             newAgent.GetComponent<Follower>().ActiveCharacter(Leader);
-		//         }
-		//         timescape = coolDown + Vector3.Distance(transform.position, Leader.gameObject.transform.position) / 100;
-		//     }
-		// }
 	}
 
 }

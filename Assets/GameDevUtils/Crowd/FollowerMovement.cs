@@ -1,5 +1,4 @@
 using GameDevUtils.CharacterController;
-using GameDevUtils.StackSystem;
 using UnityEngine;
 
 
@@ -12,30 +11,19 @@ enum MovementState
 }
 
 
-public class Follower : AIBase, IStackObject
+public class FollowerMovement : AIBase
 {
 
-	//IStackObject Implementation
-	public string     ID          => "Follower";
-	public GameObject _GameObject => gameObject;
-
-	public void SetPositionRotation(Vector3 position, Quaternion rotation)
-	{
-		MoveToTarget(position);
-	}
+	[HideInInspector] public bool stopAtTargetPos;
 
 	//Private Fields
-	private bool                   StopAtTargetPos;
-	private Leader                 Leader;
 	private Transform              FollowTarget;
 	private Vector3                MoveToTargetPosition;
-	private CaptureCharacter       CaptureCharacter;
 	private FreeMovementController PlayerController;
 	private MovementState          MovementState = MovementState.MoveToTarget;
 
 
 	//Properties
-	public Leader GetLeader => Leader;
 
 	bool _canMove;
 	bool CanMove
@@ -45,14 +33,14 @@ public class Follower : AIBase, IStackObject
 			switch (MovementState)
 			{
 				case MovementState.MoveToTarget when Vector3.Distance(transform.position, MoveToTargetPosition) < 0.7f:
-					StopAtTargetPos = false;
+					stopAtTargetPos = false;
 					_canMove        = false;
 					return _canMove;
 
 				case MovementState.Follow when PlayerController != null && PlayerController.IsPlayerInputApplied == false && Vector3.Distance(transform.position, FollowTarget.position) < 0.7f:
 					_canMove = false;
 					return _canMove;
-				
+
 				case MovementState.Follow when FollowTarget != null && PlayerController != null && PlayerController.IsPlayerInputApplied:
 					_canMove = true;
 					return _canMove;
@@ -86,10 +74,10 @@ public class Follower : AIBase, IStackObject
 		{
 			_lookAtTarget = MovementState switch
 			{
-				MovementState.MoveToTarget                                                                                      => MoveToTargetPosition,
-				MovementState.Follow when PlayerController != null && PlayerController.IsPlayerInputApplied                     => FollowTarget.position,
-				MovementState.Follow when PlayerController != null && !PlayerController.IsPlayerInputApplied && isAgentStopped  => PlayerController.gameObject.transform.position,
-				_                                                                                                               => _lookAtTarget
+				MovementState.MoveToTarget                                                                                     => MoveToTargetPosition,
+				MovementState.Follow when PlayerController != null && PlayerController.IsPlayerInputApplied                    => FollowTarget.position,
+				MovementState.Follow when PlayerController != null && !PlayerController.IsPlayerInputApplied && isAgentStopped => PlayerController.gameObject.transform.position,
+				_                                                                                                              => _lookAtTarget
 			};
 			return _lookAtTarget;
 		}
@@ -98,7 +86,6 @@ public class Follower : AIBase, IStackObject
 
 	protected override void Init()
 	{
-		CaptureCharacter = GetComponent<CaptureCharacter>();
 		if (MovementState == MovementState.Follow && FollowTarget != null && Agent.isOnNavMesh)
 			Agent.SetDestination(FollowTarget.position);
 	}
@@ -113,28 +100,18 @@ public class Follower : AIBase, IStackObject
 	}
 
 
-	public void ActiveCharacter(Leader target, bool forceFollow = false)
-	{
-		if (forceFollow) StopAtTargetPos = false;
-		if (StopAtTargetPos || Leader == target) return;
-		CaptureCharacter.SetLeader(target);
-		Leader = target;
-		FollowToTarget();
-	}
-
-
-	public void FollowToTarget()
+	public void SetFollowTarget(Transform target)
 	{
 		CanMove          = true;
 		MovementState    = MovementState.Follow;
-		FollowTarget     = Leader.transform;
-		PlayerController = Leader.GetComponent<FreeMovementController>();
+		FollowTarget     = target.transform;
+		PlayerController = target.GetComponent<FreeMovementController>();
 		Agent.SetDestination(FollowTarget.position);
 	}
 
-	public void MoveToTarget(Vector3 targetPos, bool stopAtTargetPos)
+	public void MoveToTarget(Vector3 targetPos, bool isStopAtTargetPos)
 	{
-		StopAtTargetPos = stopAtTargetPos;
+		this.stopAtTargetPos = isStopAtTargetPos;
 		MoveToTarget(targetPos);
 	}
 
@@ -147,15 +124,16 @@ public class Follower : AIBase, IStackObject
 
 	void OnTriggerStay(Collider other)
 	{
+		if(!this.enabled) return;
 		if (MovementState == MovementState.Follow && PlayerController != null && !PlayerController.IsPlayerInputApplied && other.CompareTag("Follower"))
 		{
-			if (other.GetComponent<Follower>().isAgentStopped)
+			if (other.GetComponent<FollowerMovement>().isAgentStopped)
 				CanMove = false;
 		}
 
-		if (MovementState == MovementState.MoveToTarget && !StopAtTargetPos && other.CompareTag("Follower"))
+		if (MovementState == MovementState.MoveToTarget && !stopAtTargetPos && other.CompareTag("Follower"))
 		{
-			if (other.GetComponent<Follower>().isAgentStopped)
+			if (other.GetComponent<FollowerMovement>().isAgentStopped)
 				CanMove = false;
 		}
 	}
