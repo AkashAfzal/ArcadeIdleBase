@@ -5,11 +5,11 @@ using UnityEngine;
 public class Hitbox : MonoBehaviour
 {
 
-	private                  GameObject Target;
-	[HideInInspector] public int        damage;
+	private                  Transform Target;
+	[HideInInspector] public int       damage;
 
 
-	public void AttackTarget(GameObject target)
+	public void AttackTarget(Transform target)
 	{
 		Target = target;
 	}
