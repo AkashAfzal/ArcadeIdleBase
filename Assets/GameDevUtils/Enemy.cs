@@ -116,6 +116,7 @@ public class Enemy : AIBase, IDamageable
 
 	protected override void OnFixedUpdate()
 	{
+		if (Target == null) return;
 		Move(AgentTargetPosition, AgentTargetPosition, AgentMovementSpeed, CanMove);
 	}
 
@@ -159,7 +160,6 @@ public class Enemy : AIBase, IDamageable
 	public void Damage(float damageAmount, Vector3 hitPoint)
 	{
 		healthSystem.TakeDamage(damageAmount, hitPoint);
-		Debug.Log($"{gameObject.name} Damage {healthSystem.currentHealth}");
 	}
 
 	private void OnDead()

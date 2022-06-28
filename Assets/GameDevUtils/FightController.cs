@@ -57,7 +57,6 @@ public class FightController : AIBase
 		Attack();
 		if (Target == null && DetectOpponent && Physics.OverlapSphereNonAlloc(transform.position, detectionRadius, m_Opponents, opponentLayerMask) > 0)
 		{
-			Debug.Log($"{gameObject.name} FIndNewTarget");
 			SetTarget(FindNearestOpponent());
 		}
 	}
