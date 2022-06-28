@@ -71,7 +71,7 @@ namespace GameDevUtils.StackSystem.UpgradeSystem
 		{
 			if (CurrencySystem.CurrencyManager.Instance.TotalCurrencyFor("Coins") >= UpgradePrice)
 			{
-				CurrencySystem.CurrencyManager.Instance.SubtractCurrencyValue("Coins", UpgradePrice);
+				CurrencySystem.CurrencyManager.Instance.RemoveCurrencyValue("Coins", UpgradePrice);
 				stackToUpgrade.UpgradeStackCapacity(upgradeStackName);
 				upgradePopup.OpenClosePopup(false);
 			}

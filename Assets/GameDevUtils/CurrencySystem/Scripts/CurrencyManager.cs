@@ -11,10 +11,15 @@ namespace GameDevUtils.CurrencySystem
 	public class Currency
 	{
 
-		[SerializeField] string currencyName;
-		[SerializeField] int    totalCurrency;
+		[Tooltip("Name of Currency")] [SerializeField]             string    currencyName;
+		[Tooltip("Total value of Currency")] [SerializeField]      int       totalCurrency;
+		[Tooltip("Sprite Icon For Animation")] [SerializeField]    Sprite    currencyIcon;
+		[Tooltip("It must bhe Canvas Transform")] [SerializeField] Transform animationTarget;
 
-		public string CurrencyName => currencyName;
+		public string  CurrencyName   => currencyName;
+		public Sprite  CurrencyIcon   => currencyIcon;
+		public Vector3 TargetPosition => animationTarget.position;
+		
 		public int TotalCurrency
 		{
 			private set => totalCurrency = value;
@@ -46,7 +51,7 @@ namespace GameDevUtils.CurrencySystem
 		public void RemoveCurrency(int value)
 		{
 			TotalCurrency -= value;
-			// if (TotalCurrency < 0) TotalCurrency = 0;
+			if (TotalCurrency < 0) TotalCurrency = 0;
 			SaveCurrency();
 		}
 
@@ -84,7 +89,6 @@ namespace GameDevUtils.CurrencySystem
 			}
 
 			SetAllCurrenciesInitialValues();
-			
 		}
 
 
@@ -97,68 +101,49 @@ namespace GameDevUtils.CurrencySystem
 			}
 		}
 
-		public void PlusCurrencyValue(string currencyName, int currencyValue)
+		public void AddCurrencyValue(string currencyName, int currencyValue)
 		{
-			foreach (Currency currency in currencies)
-			{
-				if (currency.CurrencyName == currencyName)
-				{
-					currency.AddCurrency(currencyValue);
-					OnCurrencyChangedEvent?.Invoke(currencyName, currency.TotalCurrency);
-					return;
-				}
-				else
-				{
-					Debug.LogError($"Currency Name of {currencyName} Not in List Please Add First");
-				}
-			}
-		}
-		
-		public void PlusCurrencyValueWithAnimation(string currencyName, int currencyValue, Vector3 startPosition)
-		{
-			foreach (Currency currency in currencies)
-			{
-				if (currency.CurrencyName == currencyName)
-				{
-					coinsAnimationManager.Animate(currencyName, currencyValue, startPosition);
-					return;
-				}
-				else
-				{
-					Debug.LogError($"Currency Name of {currencyName} Not in List Please Add First");
-				}
-			}
+			Currency currency = RequiredCurrency(currencyName);
+			if (currency == null) return;
+			currency.AddCurrency(currencyValue);
+			OnCurrencyChangedEvent?.Invoke(currencyName, currency.TotalCurrency);
 		}
 
-		public void SubtractCurrencyValue(string currencyName, int currencyValue)
+		public void AddCurrencyValueWithAnimation(string currencyName, int currencyValue, Vector3 startPosition)
 		{
-			foreach (Currency currency in currencies)
-			{
-				if (currency.CurrencyName == currencyName)
-				{
-					currency.RemoveCurrency(currencyValue);
-					OnCurrencyChangedEvent?.Invoke(currencyName, currency.TotalCurrency);
-					return;
-				}
-				else
-				{
-					Debug.LogError($"Currency Name of {currencyName} Not in List Please Add First");
-				}
-			}
+			Currency currency = RequiredCurrency(currencyName);
+			if (currency == null) return;
+			coinsAnimationManager.Animate(currencyName, currencyValue, currency.CurrencyIcon, startPosition, currency.TargetPosition);
+		}
+
+		public void RemoveCurrencyValue(string currencyName, int currencyValue)
+		{
+			Currency currency = RequiredCurrency(currencyName);
+			if (currency == null) return;
+			currency.RemoveCurrency(currencyValue);
+			OnCurrencyChangedEvent?.Invoke(currencyName, currency.TotalCurrency);
 		}
 
 		public int TotalCurrencyFor(string currencyName)
 		{
+			var currency = RequiredCurrency(currencyName);
+			return currency?.TotalCurrency ?? 0;
+		}
+
+		private Currency RequiredCurrency(string currencyName)
+		{
+			Currency requiredCurrency = null;
 			foreach (Currency currency in currencies)
 			{
 				if (currency.CurrencyName == currencyName)
 				{
-					return currency.TotalCurrency;
+					requiredCurrency = currency;
+					return requiredCurrency;
 				}
 			}
 
 			Debug.LogError($"Currency Name of {currencyName} Not in List Please Add First");
-			return 0;
+			return requiredCurrency;
 		}
 
 	}

@@ -1,4 +1,5 @@
 using System;
+using GameDevUtils.HealthSystem;
 using UnityEngine;
 
 public enum EnemyMovementState
@@ -10,16 +11,17 @@ public enum EnemyMovementState
 
 }
 
-public class Enemy : AIBase
+public class Enemy : AIBase, IDamageable
 {
 
 	//Inspector Fields
-	[SerializeField] private float     detectionRadius;
-	[SerializeField] private float     stoppingDistance;
-	[SerializeField] private int       attackDamage;
-	[SerializeField] private LayerMask opponentLayerMask;
-	[SerializeField] private Hitbox[]  hitBoxes;
-	EnemyMovementState                 EnemyMovementState = EnemyMovementState.Idle;
+	[SerializeField] private float        detectionRadius;
+	[SerializeField] private float        stoppingDistance;
+	[SerializeField] private int          attackDamage;
+	[SerializeField] private LayerMask    opponentLayerMask;
+	[SerializeField] private Hitbox[]     hitBoxes;
+	[SerializeField] private HealthSystem healthSystem;
+	EnemyMovementState                    EnemyMovementState = EnemyMovementState.Idle;
 
 
 	//Private Fields
@@ -64,15 +66,15 @@ public class Enemy : AIBase
 
 
 	Vector3 AgentTargetPosition => EnemyMovementState == EnemyMovementState.MoveTowardTarget ? Target.position : initialPos;
-
-	float AgentMovementSpeed => EnemyMovementState == EnemyMovementState.MoveTowardTarget ? movementSpeed : movementSpeed / 2;
-	bool  CanAttack          => Target             != null && (EnemyMovementState == EnemyMovementState.MoveTowardTarget && Vector3.Distance(transform.position, Target.position) < stoppingDistance);
+	float   AgentMovementSpeed  => EnemyMovementState == EnemyMovementState.MoveTowardTarget ? movementSpeed : movementSpeed / 2;
+	bool    CanAttack           => Target             != null && (EnemyMovementState == EnemyMovementState.MoveTowardTarget && Vector3.Distance(transform.position, Target.position) < stoppingDistance);
 
 
 	//Methods
 	protected override void Init()
 	{
-		initialPos = transform.position;
+		initialPos           =  transform.position;
+		healthSystem.OnDeath += OnDead;
 		SetDamageForHitBoxes();
 	}
 
@@ -95,12 +97,14 @@ public class Enemy : AIBase
 
 	private Transform FindNearestOpponent()
 	{
-		float     distance      = 10000;
-		Transform nearestTarget = null;
-		foreach (var opponent in m_Opponents)
+		float     distance      = Vector3.Distance(transform.position, m_Opponents[0].transform.position);
+		Transform nearestTarget = m_Opponents[0].transform;
+		if (m_Opponents.Length <= 0) return nearestTarget;
+		foreach (Collider opponent in m_Opponents)
 		{
+			if (opponent == null) continue;
 			var tempDistance = Vector3.Distance(transform.position, opponent.transform.position);
-			if (distance < tempDistance)
+			if (tempDistance < distance)
 			{
 				distance      = tempDistance;
 				nearestTarget = opponent.transform;
@@ -124,7 +128,7 @@ public class Enemy : AIBase
 
 	public void SetTarget(Transform target)
 	{
-		if (Target == null) return;
+		if (Target != null) return;
 		DetectOpponent     = true;
 		Target             = target;
 		HitBoxesTarget();
@@ -150,6 +154,23 @@ public class Enemy : AIBase
 		DetectOpponent     = false;
 		Target             = null;
 		EnemyMovementState = EnemyMovementState.ReturnBack;
+	}
+	
+	public void Damage(float damageAmount, Vector3 hitPoint)
+	{
+		healthSystem.TakeDamage(damageAmount, hitPoint);
+		Debug.Log($"{gameObject.name} Damage {healthSystem.currentHealth}");
+	}
+
+	private void OnDead()
+	{
+		enemyGroup.GroupEnemyDead(this);
+		Destroy(gameObject);
+	}
+
+	public void DestroyObject()
+	{
+		healthSystem.Death();
 	}
 
 

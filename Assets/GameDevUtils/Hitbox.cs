@@ -16,6 +16,7 @@ public class Hitbox : MonoBehaviour
 
 	void ApplyDamage(IDamageable iDamageable)
 	{
+		
 		iDamageable.Damage(damage, transform.position);
 	}
 
@@ -24,9 +25,11 @@ public class Hitbox : MonoBehaviour
 	{
 		if (Target != null && Target.gameObject == other.gameObject)
 		{
+			Debug.Log($"{other.gameObject.name} Trigger");
 			var iDamageAble = other.GetComponent<IDamageable>();
 			if (iDamageAble != null)
 			{
+				Debug.Log($"{other.gameObject.name} Damage {damage}");
 				ApplyDamage(iDamageAble);
 			}
 		}

@@ -47,7 +47,7 @@ public class DropArea : MonoBehaviour
 				break;
 			}
 
-			CurrencyManager.Instance.PlusCurrencyValueWithAnimation("Coins", 1, transform.position);
+			CurrencyManager.Instance.AddCurrencyValueWithAnimation("Coins", 1, transform.position);
 			stackManager.AddStack(stackName, iStackObject);
 			yield return new WaitForSeconds(0.1f);
 		}

@@ -24,7 +24,19 @@ public class EnemyGroup : MonoBehaviour
 	public event OnAttackStopDelegate OnGroupStopAttackInvoke;
 
 
-	FightLeader  fightLeader;
+	FightLeader _fightLeader;
+	FightLeader fightLeader
+	{
+		get
+		{
+			if (_fightLeader == null)
+			{
+				_fightLeader = FindObjectOfType<FightLeader>();
+			}
+
+			return _fightLeader;
+		}
+	}
 	StackManager _playerStack;
 	StackManager PlayerStack
 	{
@@ -32,7 +44,6 @@ public class EnemyGroup : MonoBehaviour
 		{
 			if (_playerStack == null)
 			{
-				fightLeader  = FindObjectOfType<FightLeader>();
 				_playerStack = fightLeader.GetComponent<StackManager>();
 			}
 
@@ -58,6 +69,11 @@ public class EnemyGroup : MonoBehaviour
 		if (allEnemies.Contains(enemy))
 		{
 			allEnemies.Remove(enemy);
+			if (allEnemies.Count == 0)
+			{
+				fightLeader.OnGroupAllEnemiesDead(this);
+				Destroy(this.gameObject);
+			}
 		}
 	}
 
@@ -67,13 +83,30 @@ public class EnemyGroup : MonoBehaviour
 		if (!attacking && Physics.OverlapSphereNonAlloc(transform.position, detectRadius, m_Opponents, opponentLayerMask) > 0)
 		{
 			attacking = true;
-			OnGroupAttackInvoke?.Invoke(m_Opponents[0].transform);
+			fightLeader.AddFightingGroup(this);
+			StartFightSetTarget();
 		}
 
 		if (attacking && PlayerStack.IsStackEmpty("Followers") && Physics.OverlapSphereNonAlloc(transform.position, detectRadius, m_Opponents, opponentLayerMask) == 0)
 		{
 			attacking = false;
 			OnGroupStopAttackInvoke?.Invoke();
+		}
+	}
+
+
+	private void StartFightSetTarget()
+	{
+		if (!PlayerStack.IsStackEmpty("Followers"))
+		{
+			foreach (Enemy enemy in allEnemies)
+			{
+				enemy.SetTarget(PlayerStack.AllElementsOfStack("Followers")[Random.Range(0, PlayerStack.AllElementsOfStack("Followers").Count)]._GameObject.transform);
+			}
+		}
+		else
+		{
+			OnGroupAttackInvoke?.Invoke(m_Opponents[0].transform);
 		}
 	}
 

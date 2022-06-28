@@ -14,7 +14,8 @@ enum MovementState
 public class FollowerMovement : AIBase
 {
 
-	[HideInInspector] public bool stopAtTargetPos;
+	
+	[HideInInspector] public  bool         stopAtTargetPos;
 
 	//Private Fields
 	private Transform              FollowTarget;

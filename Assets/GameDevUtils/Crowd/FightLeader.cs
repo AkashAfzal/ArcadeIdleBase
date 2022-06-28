@@ -5,15 +5,8 @@ using UnityEngine;
 public class FightLeader : MonoBehaviour
 {
 
-	public StackManager playerStack;
-	List<EnemyGroup>    fightingEnemiesGroups;
-	
-	public delegate void          OnAttackDelegate(Transform target);
-	public event OnAttackDelegate OnGroupAttackInvoke;
-
-
-	public delegate void              OnAttackStopDelegate();
-	public event OnAttackStopDelegate OnGroupStopAttackInvoke;
+	public   StackManager     playerStack;
+	readonly List<EnemyGroup> FightingEnemiesGroups = new List<EnemyGroup>();
 
 	public void Start()
 	{
@@ -23,28 +16,40 @@ public class FightLeader : MonoBehaviour
 
 	public void AddFightingGroup(EnemyGroup enemyGroup)
 	{
-		if (!fightingEnemiesGroups.Contains(enemyGroup))
+		if (!FightingEnemiesGroups.Contains(enemyGroup))
 		{
-			fightingEnemiesGroups.Add(enemyGroup);
-
+			FightingEnemiesGroups.Add(enemyGroup);
+			var stackElements = playerStack.AllElementsOfStack("Followers");
 			for (int i = 0; i < playerStack.CurrentCountOfStack("Followers"); i++)
 			{
-				if (fightingEnemiesGroups.Count >1)
-				{
-					var randomGroup = fightingEnemiesGroups[Random.Range(0, fightingEnemiesGroups.Count)];
-					// OnGroupAttackInvoke.Invoke(randomGroup.allEnemies[0, randomGroup.allEnemies.Count]);
-				}
+				var randomGroup = FightingEnemiesGroups[Random.Range(0, FightingEnemiesGroups.Count)];
+				stackElements[i]._GameObject.GetComponent<Follower>().StartFighting(randomGroup.allEnemies[Random.Range(0, randomGroup.allEnemies.Count)].transform);
 			}
-			
 		}
-			
 	}
 
 
 	public void OnGroupAllEnemiesDead(EnemyGroup enemyGroup)
 	{
-		if (fightingEnemiesGroups.Contains(enemyGroup))
-			fightingEnemiesGroups.Remove(enemyGroup);
+		if (FightingEnemiesGroups.Contains(enemyGroup))
+		{
+			FightingEnemiesGroups.Remove(enemyGroup);
+			
+			if (FightingEnemiesGroups.Count == 0)
+			{
+				var stackElements = playerStack.AllElementsOfStack("Followers");
+				for (int i = 0; i < playerStack.CurrentCountOfStack("Followers"); i++)
+				{
+					stackElements[i]._GameObject.GetComponent<Follower>().StopFighting();
+				}
+			}
+		}
+	}
+
+
+	public List<Enemy> RandomGroupAllEnemies()
+	{
+		return FightingEnemiesGroups[Random.Range(0, FightingEnemiesGroups.Count)].allEnemies;
 	}
 
 }

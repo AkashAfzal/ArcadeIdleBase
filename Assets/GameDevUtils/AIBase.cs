@@ -4,13 +4,13 @@ using GameDevUtils.HealthSystem;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Rigidbody))]
-public abstract class AIBase : MonoBehaviour, IDamageable
+public abstract class AIBase : MonoBehaviour
 {
 
 	[SerializeField] protected float        movementSpeed = 1;
 	[SerializeField] private   NavMeshAgent agent;
 	[SerializeField] private   Animator     animator;
-	[SerializeField]           HealthSystem healthSystem;
+	
 
 	public Animator     Animator => animator;
 	public NavMeshAgent Agent    => agent;
@@ -52,15 +52,4 @@ public abstract class AIBase : MonoBehaviour, IDamageable
 		transform.LookAt(lookAtTarget);
 		Animator.SetFloat("Value", canMove ? movementSpeed : 0);
 	}
-
-	public void Damage(float damageAmount, Vector3 hitPoint)
-	{
-		healthSystem.TakeDamage(damageAmount, hitPoint);
-	}
-
-	public void DestroyObject()
-	{
-		healthSystem.Death();
-	}
-
 }

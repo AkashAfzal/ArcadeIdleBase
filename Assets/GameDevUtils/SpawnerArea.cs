@@ -8,10 +8,11 @@ public class SpawnerArea : MonoBehaviour
 	[SerializeField] GameObject spawnPrefab;
 	[SerializeField] Transform  spawnPosition;
 
+	int                  counter =1;
 	public BaseStackArea baseStack;
-	bool                IsSpawnPrefabs;
-	Vector3             pos;
-	Quaternion          rot;
+	bool                 IsSpawnPrefabs;
+	Vector3              pos;
+	Quaternion           rot;
 
 	void OnEnable()
 	{
@@ -27,7 +28,6 @@ public class SpawnerArea : MonoBehaviour
 
 	private void StartSpawning()
 	{
-		Debug.Log("dnjklashfdlkajsfhaslj");
 		IsSpawnPrefabs = true;
 		StartCoroutine(nameof(Spawn));
 	}
@@ -44,10 +44,11 @@ public class SpawnerArea : MonoBehaviour
 		{
 			if (!baseStack.IsCapacityFullOfStack)
 			{
-				// Vector3 pos      = Vector3.one;
 				var     follower = Instantiate(spawnPrefab, spawnPosition.position, spawnPosition.rotation);
+				follower.name = $"Follower {counter}";
 				baseStack.AddStack(follower.GetComponent<IStackObject>(), ref pos, ref rot);
 				follower.GetComponent<FollowerMovement>().MoveToTarget(pos, true);
+				counter++;
 			}
 			else
 			{
